@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+
+# Prisma
+node_modules/.prisma
+/src/generated/prisma
+
+# Uploads (VERY IMPORTANT for your project)
+uploads/
+
+# Cache
+.vite/

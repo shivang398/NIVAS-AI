@@ -1,0 +1,147 @@
+
+[1m[46m RUN [49m[22m [36mv4.1.2 [39m[90m/home/shivang/Desktop/Major Project /project/backend[39m
+
+[90mstdout[2m | src/tests/property.test.js[2m > [22m[2mProperty API[2m > [22m[2mGET /api/properties[2m > [22m[2mshould fetch all properties
+[22m[39m2026-03-29T04:36:45.302Z [[32MINFO[39M]: GET /api/properties
+
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/register[2m > [22m[2mshould register a new user successfully
+[22m[39m2026-03-29T04:36:45.310Z [[32MINFO[39M]: POST /api/auth/register
+
+[0mGET /api/properties [32m200[0m 14.231 ms - 122[0m
+[90mstdout[2m | src/tests/property.test.js[2m > [22m[2mProperty API[2m > [22m[2mPOST /api/properties[2m > [22m[2mshould return 400 validation error if required fields are missing
+[22m[39m2026-03-29T04:36:45.335Z [[32MINFO[39M]: POST /api/properties
+
+[90mstdout[2m | src/tests/property.test.js[2m > [22m[2mProperty API[2m > [22m[2mPOST /api/properties[2m > [22m[2mshould return 400 validation error if required fields are missing
+[22m[39m2026-03-29T04:36:45.339Z [[31MERROR[39M]: Cannot read properties of undefined (reading 'map')
+
+[0mPOST /api/properties [31m500[0m 5.121 ms - 81[0m
+[90mstdout[2m | src/tests/property.test.js[2m > [22m[2mProperty API[2m > [22m[2mPOST /api/properties[2m > [22m[2mshould create property successfully
+[22m[39m2026-03-29T04:36:45.346Z [[32MINFO[39M]: POST /api/properties
+
+[0mPOST /api/properties [32m201[0m 1.552 ms - 141[0m
+ [31m❯[39m src/tests/property.test.js [2m([22m[2m3 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 72[2mms[22m[39m
+[31m       [31m×[31m should fetch all properties[39m[32m 48[2mms[22m[39m
+[31m       [31m×[31m should return 400 validation error if required fields are missing[39m[32m 17[2mms[22m[39m
+       [32m✓[39m should create property successfully[32m 5[2mms[22m[39m
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/register[2m > [22m[2mshould register a new user successfully
+[22m[39m2026-03-29T04:36:45.433Z [[31MERROR[39M]: secretOrPrivateKey must have a value
+
+[0mPOST /api/auth/register [31m500[0m 125.983 ms - 66[0m
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/register[2m > [22m[2mshould fail to register if user already exists
+[22m[39m2026-03-29T04:36:45.448Z [[32MINFO[39M]: POST /api/auth/register
+
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/register[2m > [22m[2mshould fail to register if user already exists
+[22m[39m2026-03-29T04:36:45.449Z [[31MERROR[39M]: User already exists
+
+[0mPOST /api/auth/register [33m400[0m 1.652 ms - 49[0m
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/login[2m > [22m[2mshould login successfully with valid credentials
+[22m[39m2026-03-29T04:36:45.547Z [[32MINFO[39M]: POST /api/auth/login
+
+[0mPOST /api/auth/login [31m500[0m 95.713 ms - 66[0m
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/login[2m > [22m[2mshould login successfully with valid credentials
+[22m[39m2026-03-29T04:36:45.642Z [[31MERROR[39M]: secretOrPrivateKey must have a value
+
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/login[2m > [22m[2mshould fail login if user not found
+[22m[39m2026-03-29T04:36:45.647Z [[32MINFO[39M]: POST /api/auth/login
+
+[0mPOST /api/auth/login [33m400[0m 1.042 ms - 44[0m
+[90mstdout[2m | src/tests/auth.test.js[2m > [22m[2mAuth API[2m > [22m[2mPOST /api/auth/login[2m > [22m[2mshould fail login if user not found
+[22m[39m2026-03-29T04:36:45.648Z [[31MERROR[39M]: User not found
+
+ [31m❯[39m src/tests/auth.test.js [2m([22m[2m4 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 372[2mms[22m[39m
+[31m       [31m×[31m should register a new user successfully[39m[32m 166[2mms[22m[39m
+       [32m✓[39m should fail to register if user already exists[32m 6[2mms[22m[39m
+[31m       [31m×[31m should login successfully with valid credentials[39m[32m 194[2mms[22m[39m
+       [32m✓[39m should fail login if user not found[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/tests/auth.test.js[2m > [22mAuth API[2m > [22mPOST /api/auth/register[2m > [22mshould register a new user successfully
+[31m[1mAssertionError[22m: expected 500 to be 201 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 201[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m src/tests/auth.test.js:[2m33:31[22m[39m
+    [90m 31|[39m
+    [90m 32|[39m       // Status could be 201 created. AppError might return standard s…
+    [90m 33|[39m       [34mexpect[39m(response[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m201[39m)[33m;[39m
+    [90m   |[39m                               [31m^[39m
+    [90m 34|[39m       [34mexpect[39m(response[33m.[39mbody[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m 35|[39m       [34mexpect[39m(response[33m.[39mbody[33m.[39mdata[33m.[39mtoken)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/tests/auth.test.js[2m > [22mAuth API[2m > [22mPOST /api/auth/login[2m > [22mshould login successfully with valid credentials
+[31m[1mAssertionError[22m: expected 500 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m src/tests/auth.test.js:[2m75:31[22m[39m
+    [90m 73|[39m         })[33m;[39m
+    [90m 74|[39m
+    [90m 75|[39m       [34mexpect[39m(response[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   |[39m                               [31m^[39m
+    [90m 76|[39m       [34mexpect[39m(response[33m.[39mbody[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m 77|[39m       [34mexpect[39m(response[33m.[39mbody[33m.[39mdata[33m.[39mtoken)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/tests/property.test.js[2m > [22mProperty API[2m > [22mGET /api/properties[2m > [22mshould fetch all properties
+[31m[1mAssertionError[22m: expected undefined to deeply equal [ { id: '1', …(3) } ][39m
+
+[32m- Expected:[39m
+[
+  {
+    "id": "1",
+    "location": "NYC",
+    "price": 1500,
+    "title": "Nice Apartment",
+  },
+]
+
+[31m+ Received:[39m
+undefined
+
+[36m [2m❯[22m src/tests/property.test.js:[2m32:45[22m[39m
+    [90m 30|[39m       [34mexpect[39m(response[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m 31|[39m       [34mexpect[39m(response[33m.[39mbody[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m 32|[39m       [34mexpect[39m(response[33m.[39mbody[33m.[39mdata[33m.[39mproperties)[33m.[39m[34mtoEqual[39m(mockProperties)[33m;[39m
+    [90m   |[39m                                             [31m^[39m
+    [90m 33|[39m     })[33m;[39m
+    [90m 34|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/tests/property.test.js[2m > [22mProperty API[2m > [22mPOST /api/properties[2m > [22mshould return 400 validation error if required fields are missing
+[31m[1mAssertionError[22m: expected 500 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 500[39m
+
+[36m [2m❯[22m src/tests/property.test.js:[2m45:31[22m[39m
+    [90m 43|[39m         })[33m;[39m
+    [90m 44|[39m
+    [90m 45|[39m       expect(response.status).toBe(400); // Because of validation midd…
+    [90m   |[39m                               [31m^[39m
+    [90m 46|[39m     })[33m;[39m
+    [90m 47|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 10:06:44
+[2m   Duration [22m 1.01s[2m (transform 308ms, setup 106ms, import 907ms, tests 444ms, environment 0ms)[22m
+

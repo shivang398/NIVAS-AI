@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////
+// 👤 USER
+//////////////////////////////////////////////////////
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+  role     Role
+
+  properties Property[] @relation("OwnerProperties")
+  offers     Offer[]    @relation("TenantOffers")
+
+  messages      Message[]
+  notifications Notification[]
+
+  // 🔥 MAINTENANCE RELATIONS
+  maintenances      Maintenance[] @relation("TenantMaintenance")
+  ownedMaintenances Maintenance[] @relation("OwnerMaintenance")
+
+  // 🔥 VERIFICATION
+  verifications Verification[]
+
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  TENANT
+  OWNER
+  POLICE
+}
+
+//////////////////////////////////////////////////////
+// 🏠 PROPERTY
+//////////////////////////////////////////////////////
+model Property {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  location    String
+  price       Int
+  deposit     Int?
+
+  latitude  Float?
+  longitude Float?
+
+  imageUrls String[]
+
+  status PropertyStatus @default(AVAILABLE)
+
+  ownerId String
+  owner   User   @relation("OwnerProperties", fields: [ownerId], references: [id])
+
+  offers Offer[]
+  leases Lease[]
+
+  createdAt DateTime @default(now())
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  OCCUPIED
+}
+
+//////////////////////////////////////////////////////
+// 💰 OFFER
+//////////////////////////////////////////////////////
+model Offer {
+  id         String      @id @default(uuid())
+  tenantId   String
+  propertyId String
+  price      Int
+  status     OfferStatus @default(PENDING)
+
+  tenant   User     @relation("TenantOffers", fields: [tenantId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  // 🔥 VERIFICATION LINK
+  verifications Verification[]
+
+  chat    Chat?
+  history OfferHistory[]
+
+  createdAt DateTime @default(now())
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+//////////////////////////////////////////////////////
+// 💬 CHAT
+//////////////////////////////////////////////////////
+model Chat {
+  id      String @id @default(uuid())
+  offerId String @unique
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 📨 MESSAGE
+//////////////////////////////////////////////////////
+model Message {
+  id       String @id @default(uuid())
+  chatId   String
+  senderId String
+  text     String
+
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 📊 OFFER HISTORY
+//////////////////////////////////////////////////////
+model OfferHistory {
+  id        String @id @default(uuid())
+  offerId   String
+  price     Int
+  updatedBy String
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 🧾 VERIFICATION
+//////////////////////////////////////////////////////
+model Verification {
+  id           String             @id @default(uuid())
+  tenantId     String
+  offerId      String
+  status       VerificationStatus @default(PENDING)
+  leaseCreated Boolean            @default(false)
+
+  tenant User  @relation(fields: [tenantId], references: [id])
+  offer  Offer @relation(fields: [offerId], references: [id])
+
+  documents  Document[]
+  fraudCheck FraudCheck?
+
+  createdAt DateTime @default(now())
+}
+
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+//////////////////////////////////////////////////////
+// 📄 DOCUMENT
+//////////////////////////////////////////////////////
+model Document {
+  id             String @id @default(uuid())
+  verificationId String
+  fileUrl        String
+  fileType       String
+
+  verification Verification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 🚨 FRAUD CHECK
+//////////////////////////////////////////////////////
+model FraudCheck {
+  id             String @id @default(uuid())
+  verificationId String @unique
+  score          Int
+  status         String
+  remarks        String
+
+  verification Verification @relation(fields: [verificationId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 📄 LEASE
+//////////////////////////////////////////////////////
+model Lease {
+  id         String @id @default(uuid())
+  tenantId   String
+  ownerId    String
+  propertyId String
+
+  rent     Int
+  duration Int
+
+  startDate DateTime
+  endDate   DateTime
+
+  status String @default("active")
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 🛠 MAINTENANCE
+//////////////////////////////////////////////////////
+model Maintenance {
+  id         String @id @default(uuid())
+  propertyId String
+  tenantId   String
+  ownerId    String
+
+  issue    String
+  priority String
+  status   String @default("open")
+
+  // 🔥 RELATIONS FIXED
+  tenant User @relation("TenantMaintenance", fields: [tenantId], references: [id])
+  owner  User @relation("OwnerMaintenance", fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// 🔔 NOTIFICATION
+//////////////////////////////////////////////////////
+model Notification {
+  id      String  @id @default(uuid())
+  userId  String
+  title   String
+  message String
+  isRead  Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
