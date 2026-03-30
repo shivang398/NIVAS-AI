@@ -66,15 +66,41 @@ const PoliceDashboardTab = ({ user }) => {
                     Reference Offer: {v.offerId}
                   </p>
                   
-                  {v.fraudCheck && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                      <AlertTriangle size={16} color={v.fraudCheck.score > 70 ? '#fca5a5' : '#4ade80'} />
-                      <span style={{ fontSize: '0.9rem', color: v.fraudCheck.score > 70 ? '#fca5a5' : '#4ade80' }}>
-                        AI Trust Score: {100 - v.fraudCheck.score}/100 
-                        <span className="text-secondary" style={{ marginLeft: '4px' }}> ({v.fraudCheck.remarks})</span>
-                      </span>
-                    </div>
-                  )}
+                  {v.fraudCheck && (() => {
+                    const trustScore = 100 - v.fraudCheck.score;
+                    const scoreColor = trustScore >= 70 ? '#4ade80' : trustScore >= 30 ? '#f59e0b' : '#ef4444';
+                    let fraudReasons = [];
+                    try {
+                      const parsed = JSON.parse(v.fraudCheck.remarks);
+                      fraudReasons = parsed.reasons || [];
+                    } catch { fraudReasons = []; }
+
+                    return (
+                      <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <AlertTriangle size={16} color={scoreColor} />
+                          <span style={{ fontSize: '0.95rem', fontWeight: 600, color: scoreColor }}>
+                            AI Trust Score: {trustScore}/100
+                          </span>
+                          <span style={{ 
+                            padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700,
+                            background: `${scoreColor}22`, color: scoreColor, textTransform: 'uppercase'
+                          }}>
+                            {v.fraudCheck.status}
+                          </span>
+                        </div>
+                        {fraudReasons.length > 0 && (
+                          <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: `3px solid ${scoreColor}` }}>
+                            {fraudReasons.map((reason, i) => (
+                              <p key={i} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.2rem 0' }}>
+                                ⚠ {reason}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="documents-list" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     {v.documents?.map(doc => {

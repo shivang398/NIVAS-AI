@@ -4,15 +4,26 @@
   padding: 0;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-  text-decoration: none;
   border: 1px solid var(--border-glass);
+  position: relative;
+}
+
+.card-link {
+  text-decoration: none;
+  cursor: pointer;
+  display: block;
 }
 
 .property-card:hover {
   transform: translateY(-8px);
   border-color: rgba(99, 102, 241, 0.3);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.mini-map-active {
+  transform: translateY(-4px);
+  border-color: var(--secondary);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
 }
 
 .property-image-wrapper {
@@ -33,10 +44,29 @@
   transform: scale(1.05);
 }
 
+.property-status-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  backdrop-filter: blur(4px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
 .property-badge {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   background: var(--accent-gradient);
   color: white;
   padding: 0.25rem 0.75rem;
@@ -45,6 +75,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
 .property-content {
@@ -73,6 +104,15 @@
   font-size: 1.125rem;
   margin: 0;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.property-location-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .property-location {
@@ -81,6 +121,42 @@
   gap: 0.5rem;
   color: var(--text-secondary);
   font-size: 0.875rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.property-location span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-map-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.mini-map-toggle:hover {
+  background: var(--secondary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.property-mini-map {
+  margin-top: -8px;
+  border-top: 1px solid var(--border-glass);
+  background: #000;
+  overflow: hidden;
 }
 
 .property-features {

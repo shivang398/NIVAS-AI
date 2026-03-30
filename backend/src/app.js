@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 //////////////////////////////////////////////////////
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 500, // Increased for development — dashboard makes many API calls
 });
 
 app.use((req, res, next) => {

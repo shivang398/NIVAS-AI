@@ -16,6 +16,8 @@ export const getLeases = asyncHandler(async (req, res) => {
     },
     include: {
       property: true,
+      tenant: { select: { name: true, email: true } },
+      owner: { select: { name: true, email: true } },
     },
   });
 

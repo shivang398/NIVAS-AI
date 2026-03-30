@@ -80,14 +80,16 @@ export const uploadDocumentService = async (body, file) => {
     });
   }
 
-////
+  // Re-run fraud check on every upload (delete old one first to get fresh score)
   const existingFraud = await prisma.fraudCheck.findUnique({
     where: { verificationId },
   });
 
-  if (!existingFraud) {
-    await runFraudCheck(verificationId, fileUrl);
+  if (existingFraud) {
+    await prisma.fraudCheck.delete({ where: { verificationId } });
   }
+
+  await runFraudCheck(verificationId, fileUrl);
 
 
   await notifyUsersByRole(
@@ -161,6 +163,23 @@ export const getVerificationService = async (user) => {
   }
 
   if (user.role === "POLICE") {
+    const queue = await prisma.verification.findMany({
+      where: { status: "UNDER_REVIEW" },
+      include: {
+        documents: true,
+        fraudCheck: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Automatically trigger fraud checks for anything missing one
+    for (const v of queue) {
+      if (!v.fraudCheck && v.documents?.length > 0) {
+        await runFraudCheck(v.id, v.documents[0].fileUrl);
+      }
+    }
+
+    // Return the updated queue
     return prisma.verification.findMany({
       where: { status: "UNDER_REVIEW" },
       include: {

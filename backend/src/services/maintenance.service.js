@@ -12,12 +12,12 @@ export const createMaintenanceService = async (user, body) => {
     where: {
       tenantId: user.id,
       propertyId,
-      status: "active",
+      status: { equals: "active", mode: "insensitive" },
     },
   });
 
   if (!lease) {
-    throw new AppError("No active lease found", 400);
+    throw new AppError("No active lease found for this property. You need an active lease to submit maintenance requests.", 400);
   }
 
 

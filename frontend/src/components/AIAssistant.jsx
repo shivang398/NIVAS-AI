@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Bot, Send, X } from 'lucide-react';
+import { Bot, Send, X, Sparkles } from 'lucide-react';
 import './AIAssistant.css';
 
 const AIAssistant = () => {
@@ -8,10 +8,18 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([{ sender: 'ai', text: 'Hello! I am Nivas AI. How can I help you today?' }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, loading]);
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
     const userMsg = input.trim();
     setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
@@ -20,11 +28,15 @@ const AIAssistant = () => {
 
     try {
       const res = await axios.post('/ai/chat', { prompt: userMsg });
-      if (res.data.success) {
+      if (res.data.success && res.data.data?.result) {
         setMessages(prev => [...prev, { sender: 'ai', text: res.data.data.result }]);
+      } else {
+        setMessages(prev => [...prev, { sender: 'ai', text: 'Sorry, I could not process your request. Please try again.' }]);
       }
     } catch (err) {
-      setMessages(prev => [...prev, { sender: 'ai', text: 'Error connecting to AI service.' }]);
+      console.error("AI Chat Error:", err);
+      const errorMsg = err.response?.data?.message || 'Error connecting to AI service. Please check if the server is running.';
+      setMessages(prev => [...prev, { sender: 'ai', text: errorMsg }]);
     } finally {
       setLoading(false);
     }
@@ -36,7 +48,7 @@ const AIAssistant = () => {
         <div className="ai-chat-window glass-card animate-fade-in">
           <div className="ai-header">
             <div className="ai-title">
-              <Bot size={20} className="text-secondary" />
+              <Sparkles size={20} style={{ color: '#818cf8' }} />
               <span>Nivas Assistant</span>
             </div>
             <button className="icon-btn" onClick={() => setIsOpen(false)}><X size={18} /></button>
@@ -50,9 +62,10 @@ const AIAssistant = () => {
             ))}
             {loading && (
               <div className="ai-message ai">
-                <p className="typing-indicator">...</p>
+                <p className="typing-indicator">Thinking...</p>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
           
           <form onSubmit={handleSend} className="ai-input-form">
@@ -62,6 +75,7 @@ const AIAssistant = () => {
               onChange={e => setInput(e.target.value)} 
               placeholder="Ask anything..." 
               className="ai-input"
+              autoFocus
             />
             <button type="submit" className="ai-send-btn" disabled={!input.trim() || loading}>
               <Send size={18} />

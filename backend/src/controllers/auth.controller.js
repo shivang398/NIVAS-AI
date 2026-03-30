@@ -43,6 +43,7 @@ export const register = asyncHandler(async (req, res) => {
     {
       id: user.id,
       role: user.role,
+      isVerified: user.isVerified,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
@@ -50,7 +51,7 @@ export const register = asyncHandler(async (req, res) => {
 
   return created(
     res,
-    { token, role: user.role },
+    { token, role: user.role, isVerified: user.isVerified },
     "User registered successfully"
   );
 });
@@ -80,6 +81,7 @@ export const login = asyncHandler(async (req, res) => {
     {
       id: user.id,
       role: user.role,
+      isVerified: user.isVerified,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
@@ -87,7 +89,7 @@ export const login = asyncHandler(async (req, res) => {
 
   return success(
     res,
-    { token, role: user.role },
+    { token, role: user.role, isVerified: user.isVerified },
     "Login successful"
   );
 });

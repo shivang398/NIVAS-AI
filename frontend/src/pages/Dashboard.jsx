@@ -32,8 +32,20 @@ const Dashboard = () => {
     try {
       if (isPolice) return; // Handled inside Police Dashboard
 
+      // Fetch leases for both owners and tenants
+      let activeLeaseCount = 0;
+      try {
+        const leasesRes = await axios.get('/leases');
+        if (leasesRes.data.success) {
+          const activeLeases = leasesRes.data.data.filter(l => l.status?.toLowerCase() === 'active');
+          activeLeaseCount = activeLeases.length;
+        }
+      } catch (leaseErr) {
+        console.error("Failed to fetch leases", leaseErr);
+      }
+
       if (isOwner) {
-        // Fetch properties (since backend lacks /my-properties, fetch all and filter client side for MVP)
+        // Fetch properties
         const res = await axios.get('/properties');
         if (res.data.success) {
           const ownerProps = res.data.data.filter(p => p.ownerId === user?.id || (p.owner && p.owner?.id === user?.id));
@@ -44,13 +56,15 @@ const Dashboard = () => {
             const offersRes = await axios.get('/offers');
             if (offersRes.data.success) {
               setApplications(offersRes.data.data);
-              setStats(s => ({ ...s, properties: ownerProps.length, pending: offersRes.data.data.length }));
+              const pendingOffers = offersRes.data.data.filter(o => o.status === 'PENDING');
+              const availableProps = ownerProps.filter(p => p.status === 'AVAILABLE');
+              setStats({ properties: availableProps.length, pending: pendingOffers.length, closed: activeLeaseCount });
             } else {
-              setStats(s => ({ ...s, properties: ownerProps.length }));
+              setStats(s => ({ ...s, properties: ownerProps.length, closed: activeLeaseCount }));
             }
           } catch (offerErr) {
             console.error("Failed to fetch owner applications", offerErr);
-            setStats(s => ({ ...s, properties: ownerProps.length }));
+            setStats(s => ({ ...s, properties: ownerProps.length, closed: activeLeaseCount }));
           }
         }
       } else {
@@ -58,7 +72,11 @@ const Dashboard = () => {
         const res = await axios.get('/offers');
         if (res.data.success) {
           setApplications(res.data.data);
-          setStats(s => ({ ...s, pending: res.data.data.length }));
+          const pendingOffers = res.data.data.filter(o => o.status === 'PENDING');
+          const acceptedOffers = res.data.data.filter(o => o.status === 'ACCEPTED');
+          setStats({ properties: acceptedOffers.length, pending: pendingOffers.length, closed: activeLeaseCount });
+        } else {
+          setStats(s => ({ ...s, closed: activeLeaseCount }));
         }
       }
     } catch (err) {
@@ -110,9 +128,23 @@ const Dashboard = () => {
       <div className="dashboard-layout">
         <aside className="dashboard-sidebar glass-card">
           <div className="user-profile-summary">
-            <div className="avatar-large">{user?.role?.charAt(0)?.toUpperCase() || 'U'}</div>
-            <h3 style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '180px' }}>{user?.email || 'User Account'}</h3>
-            <span className="role-badge dashboard-badge">{user?.role || 'TENANT'}</span>
+            <div className="avatar-large" style={{ position: 'relative' }}>
+              {user?.role?.charAt(0)?.toUpperCase() || 'U'}
+              {user?.isVerified && (
+                <div style={{ 
+                  position: 'absolute', bottom: 0, right: 0, 
+                  background: '#4ade80', borderRadius: '50%', padding: '4px',
+                  border: '3px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <ShieldCheck size={12} color="#000" />
+                </div>
+              )}
+            </div>
+            <h3 style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '180px', marginBottom: '0.25rem' }}>{user?.email || 'User Account'}</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+              <span className="role-badge dashboard-badge">{user?.role || 'TENANT'}</span>
+              {user?.isVerified && <span style={{ color: '#4ade80', fontSize: '0.7rem', fontWeight: 600 }}>VERIFIED</span>}
+            </div>
           </div>
           
           <nav className="dashboard-nav">
@@ -174,8 +206,8 @@ const Dashboard = () => {
                 <div className="stat-card glass-card">
                   <div className="stat-icon-wrapper"><Building size={24} /></div>
                   <div className="stat-details">
-                    <p className="stat-label">{isOwner ? 'Active Listings' : 'Saved Homes'}</p>
-                    <h3 className="stat-number">{isOwner ? stats.properties : 0}</h3>
+                    <p className="stat-label">{isOwner ? 'Active Listings' : 'Accepted Offers'}</p>
+                    <h3 className="stat-number">{stats.properties}</h3>
                   </div>
                 </div>
                 <div className="stat-card glass-card">

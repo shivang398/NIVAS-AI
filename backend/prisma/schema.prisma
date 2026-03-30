@@ -16,6 +16,7 @@ model User {
   email    String @unique
   password String
   role     Role
+  isVerified Boolean @default(false)
 
   properties Property[] @relation("OwnerProperties")
   offers     Offer[]    @relation("TenantOffers")
@@ -31,6 +32,10 @@ model User {
   verifications Verification[]
 
   createdAt DateTime @default(now())
+
+  // 🔥 LEASES
+  tenantLeases Lease[] @relation("TenantLeases")
+  ownerLeases  Lease[] @relation("OwnerLeases")
 }
 
 enum Role {
@@ -198,8 +203,6 @@ model FraudCheck {
 }
 
 //////////////////////////////////////////////////////
-// 📄 LEASE
-//////////////////////////////////////////////////////
 model Lease {
   id         String @id @default(uuid())
   tenantId   String
@@ -215,6 +218,8 @@ model Lease {
   status String @default("active")
 
   property Property @relation(fields: [propertyId], references: [id])
+  tenant   User     @relation("TenantLeases", fields: [tenantId], references: [id])
+  owner    User     @relation("OwnerLeases", fields: [ownerId], references: [id])
 
   createdAt DateTime @default(now())
 }

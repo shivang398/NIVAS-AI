@@ -1,6 +1,34 @@
-import prisma from "../config/prisma.js";
-import { AppError } from "../utils/AppError.js";
+import https from "node:https";
 
+const geocodeLocation = (location) => {
+  return new Promise((resolve) => {
+    const options = {
+      hostname: 'nominatim.openstreetmap.org',
+      path: `/search?q=${encodeURIComponent(location)}&format=json&limit=1`,
+      headers: { 'User-Agent': 'NivasAI/1.0' }
+    };
+
+    https.get(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        try {
+          const results = JSON.parse(data);
+          if (results.length > 0) {
+            resolve({
+              lat: parseFloat(results[0].lat),
+              lon: parseFloat(results[0].lon)
+            });
+          } else {
+            resolve(null);
+          }
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }).on('error', () => resolve(null));
+  });
+};
 
 export const createPropertyService = async (body, ownerId, images) => {
   const {
@@ -17,6 +45,18 @@ export const createPropertyService = async (body, ownerId, images) => {
     throw new AppError("Title, price and location are required", 400);
   }
 
+  // Auto-geocode if coordinates are missing
+  let lat = latitude ? Number(latitude) : null;
+  let lon = longitude ? Number(longitude) : null;
+
+  if (!lat || !lon) {
+    const coords = await geocodeLocation(location);
+    if (coords) {
+      lat = coords.lat;
+      lon = coords.lon;
+    }
+  }
+
   return prisma.property.create({
     data: {
       title,
@@ -24,8 +64,8 @@ export const createPropertyService = async (body, ownerId, images) => {
       price: Number(price),
       location,
       deposit: deposit ? Number(deposit) : null,
-      latitude: latitude ? Number(latitude) : null,
-      longitude: longitude ? Number(longitude) : null,
+      latitude: lat,
+      longitude: lon,
       imageUrls: images || [],
       ownerId,
     },

@@ -66,16 +66,44 @@ const VerificationTab = ({ isOwner, user }) => {
           <h2><ShieldCheck className="text-gradient" size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }}/>Trust Center</h2>
         </div>
 
-        {!isOwner && acceptedOffers.length > 0 && (
-          <div className="alert-box mb-4" style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid #4ade80', borderRadius: '8px' }}>
-            <h4 style={{ color: '#4ade80', marginBottom: '0.5rem' }}>Action Required: Police Verification</h4>
-            <p className="text-sm text-secondary">You have Accepted Offers that require legal background verification before generating the smart lease.</p>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-              {acceptedOffers.filter(o => !verifications.some(v => v.offerId === o.id)).map(offer => (
-                <button key={offer.id} className="btn-secondary small" onClick={() => handleCreateVerification(offer.id)}>
-                  Start Verification for #{offer.id.substring(0,6)}
-                </button>
-              ))}
+        {!isOwner && (
+          (() => {
+            const pendingActions = acceptedOffers.filter(o => !verifications.some(v => v.offerId === o.id));
+            if (pendingActions.length === 0) return null;
+
+            return (
+              <div className="alert-box mb-4" style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid #4ade80', borderRadius: '12px' }}>
+                <h4 style={{ color: '#4ade80', marginBottom: '0.5rem', display: 'flex', alignItems: 'center' }}>
+                  <ShieldCheck size={20} style={{ marginRight: '8px' }}/> Action Required: Police Verification
+                </h4>
+                <p className="text-sm text-secondary">New Accepted Offers found! Initiate your background verification to generate the smart lease.</p>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+                  {pendingActions.map(offer => (
+                    <button key={offer.id} className="btn-secondary small" onClick={() => handleCreateVerification(offer.id)}>
+                      Start Verification for #{offer.id.substring(0,6)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()
+        )}
+
+        {verifications.length > 0 && (
+          <div className="progress-section mb-4" style={{ marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+              <span className="text-secondary">Verification Progress</span>
+              <span className="text-gradient" style={{ fontWeight: 600 }}>
+                {Math.round((verifications.filter(v => v.status === 'APPROVED').length / verifications.length) * 100)}% Complete
+              </span>
+            </div>
+            <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ 
+                height: '100%', 
+                width: `${(verifications.filter(v => v.status === 'APPROVED').length / verifications.length) * 100}%`, 
+                background: 'linear-gradient(90deg, #4ade80, #22c55e)',
+                transition: 'width 0.5s ease'
+              }} />
             </div>
           </div>
         )}
@@ -85,36 +113,46 @@ const VerificationTab = ({ isOwner, user }) => {
         ) : (
           <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {verifications.map(v => (
-              <div key={v.id} style={{ border: '1px solid var(--border-glass)', padding: '1.5rem', borderRadius: '12px' }}>
-                <h4>Status: <span className={`status-badge ${v.status === 'PENDING' ? 'pending' : ''}`}>{v.status}</span></h4>
-                <p className="text-secondary text-sm mt-2">Offer ID: #{v.offerId.substring(0,6)}</p>
+              <div key={v.id} className="glass-card" style={{ padding: '1.5rem', borderRadius: '16px', border: v.status === 'APPROVED' ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid var(--border-glass)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                   <h4 style={{ margin: 0 }}>ID #{v.offerId.substring(0,6)}</h4>
+                   <span className={`status-badge ${v.status.toLowerCase()}`} style={{ 
+                     background: v.status === 'APPROVED' ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255,255,255,0.05)',
+                     color: v.status === 'APPROVED' ? '#4ade80' : 'inherit'
+                   }}>{v.status}</span>
+                </div>
+                
+                {v.fraudCheck && (
+                  <div className="mb-2" style={{ fontSize: '0.8rem', padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', marginBottom: '1rem' }}>
+                    AI Trust Score: <span style={{ color: v.fraudCheck.score < 30 ? '#4ade80' : '#f59e0b', fontWeight: 600 }}>{100 - v.fraudCheck.score}/100</span>
+                  </div>
+                )}
                 
                 {!isOwner && v.status === 'PENDING' && (
-                  <div className="mt-2" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    
+                  <div className="mt-2" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {!v.documents?.some(d => d.fileType === 'AADHAR_CARD') ? (
-                      <label className="btn-primary" style={{ display: 'inline-block', cursor: 'pointer', textAlign: 'center', width: '100%', padding: '0.75rem' }}>
-                        <Upload size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Upload Aadhar Card
+                      <label className="btn-primary small" style={{ display: 'block', cursor: 'pointer', textAlign: 'center' }}>
+                        <Upload size={14} /> Upload Aadhar
                         <input type="file" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, v.id, 'AADHAR_CARD')} />
                       </label>
-                    ) : (
-                      <div style={{ textAlign: 'center', width: '100%', padding: '0.75rem', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', borderRadius: '8px', border: '1px solid #4ade80', fontSize: '0.9rem' }}>
-                        ✓ Aadhar Card Uploaded
-                      </div>
-                    )}
+                    ) : <div className="text-center text-xs text-secondary">✓ Aadhar Verified</div>}
 
                     {!v.documents?.some(d => d.fileType === 'PAN_CARD') ? (
-                      <label className="btn-primary" style={{ display: 'inline-block', cursor: 'pointer', textAlign: 'center', width: '100%', padding: '0.75rem' }}>
-                        <Upload size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Upload PAN Card
+                      <label className="btn-primary small" style={{ display: 'block', cursor: 'pointer', textAlign: 'center' }}>
+                        <Upload size={14} /> Upload PAN
                         <input type="file" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, v.id, 'PAN_CARD')} />
                       </label>
-                    ) : (
-                      <div style={{ textAlign: 'center', width: '100%', padding: '0.75rem', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', borderRadius: '8px', border: '1px solid #4ade80', fontSize: '0.9rem' }}>
-                        ✓ PAN Card Uploaded
-                      </div>
-                    )}
-
+                    ) : <div className="text-center text-xs text-secondary">✓ PAN Verified</div>}
                   </div>
+                )}
+
+                {v.status === 'APPROVED' && (
+                   <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(74, 222, 128, 0.05)', borderRadius: '8px', border: '1px solid rgba(74, 222, 128, 0.2)', textAlign: 'center' }}>
+                     <p className="text-secondary" style={{ fontSize: '0.75rem', margin: 0 }}>
+                       <ShieldCheck size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }}/> 
+                       Identity & Trust Verified. Your Smart Lease is now available in the <b>Leases</b> tab.
+                     </p>
+                   </div>
                 )}
               </div>
             ))}
@@ -124,12 +162,22 @@ const VerificationTab = ({ isOwner, user }) => {
 
       <div className="glass-card" style={{ padding: '2rem' }}>
         <h2><FileText className="text-secondary" size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }}/>NOC Certificates</h2>
-        {nocs.length === 0 ? (
+        {verifications.filter(v => v.status === 'APPROVED').length === 0 ? (
           <p className="text-secondary mt-2">No NOC Certificates issued yet.</p>
         ) : (
-          <div className="grid">
-             {nocs.map(noc => (
-               <div key={noc.id} className="badge">NOC Issued</div>
+          <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+             {verifications.filter(v => v.status === 'APPROVED').map(v => (
+               <div key={v.id} style={{ 
+                 padding: '1rem', background: 'rgba(74, 222, 128, 0.05)', border: '1px dashed #4ade80', borderRadius: '12px',
+                 display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', textAlign: 'center'
+               }}>
+                 <ShieldCheck size={32} color="#4ade80" />
+                 <div>
+                   <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>NOC Issued</div>
+                   <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>Ref: {v.id.substring(0,8)}</div>
+                 </div>
+                 <button className="btn-secondary small" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }} onClick={() => window.print()}>Download</button>
+               </div>
              ))}
           </div>
         )}

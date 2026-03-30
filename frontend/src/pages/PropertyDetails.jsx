@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { MapPin, Bed, Bath, Square, Calendar, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../context/AuthContext';
-import { parseDescription } from '../utils/propertyParser';
+import { parseDescription, AMENITIES_LIST } from '../utils/propertyParser';
 import './PropertyDetails.css';
 
 const PropertyDetails = () => {
@@ -96,13 +98,32 @@ const PropertyDetails = () => {
           </div>
           
           <div className="details-section glass-card">
-            <h2>Key Features</h2>
-            <ul className="features-list">
-              <li><ShieldCheck size={16} className="text-secondary" /> Secure Lease Verification</li>
-              <li><ShieldCheck size={16} className="text-secondary" /> 24/7 Digital Support</li>
-              {/* Derived features mock if none provided */}
-              {parsed.type === 'Premium' && <li><ShieldCheck size={16} className="text-secondary" /> Luxury Finishings</li>}
-            </ul>
+            <h2>Amenities & Features</h2>
+            {parsed.amenities && parsed.amenities.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '0.75rem' }}>
+                {parsed.amenities.map(amenityId => {
+                  const amenity = AMENITIES_LIST.find(a => a.id === amenityId);
+                  return amenity ? (
+                    <div key={amenityId} style={{
+                      display: 'flex', alignItems: 'center', gap: '0.5rem',
+                      padding: '0.6rem 0.9rem', borderRadius: '10px',
+                      background: 'rgba(99, 102, 241, 0.08)',
+                      border: '1px solid rgba(99, 102, 241, 0.2)',
+                      fontSize: '0.9rem'
+                    }}>
+                      <span style={{ fontSize: '1.1rem' }}>{amenity.icon}</span>
+                      <span>{amenity.label}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            ) : (
+              <ul className="features-list">
+                <li><ShieldCheck size={16} className="text-secondary" /> Secure Lease Verification</li>
+                <li><ShieldCheck size={16} className="text-secondary" /> 24/7 Digital Support</li>
+                {parsed.type === 'Premium' && <li><ShieldCheck size={16} className="text-secondary" /> Luxury Finishings</li>}
+              </ul>
+            )}
           </div>
         </div>
         
@@ -113,21 +134,49 @@ const PropertyDetails = () => {
               <span className="price-term">/month</span>
             </div>
             
-            <div className="availability row-flex">
-              <Calendar size={16} /> <span>{property.status === 'AVAILABLE' ? 'Available Now' : 'Occupied'}</span>
+            <div className="availability row-flex" style={{ color: property.status === 'AVAILABLE' ? '#4ade80' : '#f87171' }}>
+              <Calendar size={16} /> 
+              <span>{property.status === 'AVAILABLE' ? 'Available Now' : '🔒 Currently Leased'}</span>
             </div>
             
             <div className="owner-info">
-              <div className="owner-avatar">{property.owner?.name?.charAt(0) || 'U'}</div>
+              <div className="owner-avatar" style={{ position: 'relative' }}>
+                {property.owner?.name?.charAt(0) || 'U'}
+                {property.owner?.isVerified && (
+                  <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#4ade80', borderRadius: '50%', padding: '2px', border: '2px solid #1a1a1a' }}>
+                    <ShieldCheck size={10} color="#000" />
+                  </div>
+                )}
+              </div>
               <div>
                 <p className="owner-label">Listed by</p>
-                <p className="owner-name">{property.owner?.name || 'Owner'}</p>
-                <div className="verified-badge"><ShieldCheck size={14} /> Verified Owner</div>
+                <p className="owner-name" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {property.owner?.name || 'Owner'}
+                  {property.owner?.isVerified && <span style={{ color: '#4ade80', fontSize: '0.65rem', fontWeight: 700 }}>VERIFIED</span>}
+                </p>
+                <div className="text-secondary text-xs">{property.owner?.email}</div>
               </div>
             </div>
             
+            {(property.latitude && property.longitude) && (
+              <div className="property-location-map" style={{ marginTop: '1.5rem', height: '200px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-glass)' }}>
+                <MapContainer center={[property.latitude, property.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={[property.latitude, property.longitude]} />
+                </MapContainer>
+              </div>
+            )}
+            
             <div className="action-buttons">
-              {user ? (
+              {property.status === 'OCCUPIED' ? (
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'rgba(248, 113, 113, 0.1)', borderRadius: '12px', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
+                  <p style={{ color: '#f87171', fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>This property is currently leased</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Check back later for availability</p>
+                </div>
+              ) : user ? (
                 <>
                   <button 
                     className="btn-primary w-100" 

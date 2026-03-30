@@ -45,7 +45,12 @@ export const AuthProvider = ({ children }) => {
       const storedRole = sessionStorage.getItem('nivas_role');
       const decodedUser = decodeToken(token);
       if (decodedUser) {
-        setUser({ id: decodedUser.id, role: decodedUser.role || storedRole, token });
+        setUser({ 
+          id: decodedUser.id, 
+          role: decodedUser.role || storedRole, 
+          isVerified: decodedUser.isVerified,
+          token 
+        });
       } else if (storedRole) {
         setUser({ role: storedRole, token });
       }

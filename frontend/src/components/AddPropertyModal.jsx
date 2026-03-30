@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Home, IndianRupee, MapPin, UploadCloud, X } from 'lucide-react';
-import { encodeDescription } from '../utils/propertyParser';
+import { encodeDescription, AMENITIES_LIST } from '../utils/propertyParser';
 import './AddProperty.css';
 
 const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
@@ -16,11 +16,21 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
     beds: 1,
     baths: 1,
     sqft: '',
-    description: ''
+    description: '',
+    amenities: []
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const toggleAmenity = (amenityId) => {
+    setFormData(prev => ({
+      ...prev,
+      amenities: prev.amenities.includes(amenityId)
+        ? prev.amenities.filter(a => a !== amenityId)
+        : [...prev.amenities, amenityId]
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -43,7 +53,8 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       beds: formData.beds,
       baths: formData.baths,
       sqft: formData.sqft,
-      type: formData.type
+      type: formData.type,
+      amenities: formData.amenities
     });
     
     payload.append('description', encodedDesc);
@@ -113,6 +124,51 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
               <label className="input-label">Sqft</label>
               <input type="number" name="sqft" className="input-field" placeholder="e.g. 1200" value={formData.sqft} onChange={handleChange} />
             </div>
+          </div>
+
+          {/* Amenities Section */}
+          <div className="input-group">
+            <label className="input-label">Amenities</label>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
+              gap: '0.5rem', 
+              marginTop: '0.5rem' 
+            }}>
+              {AMENITIES_LIST.map(amenity => {
+                const isSelected = formData.amenities.includes(amenity.id);
+                return (
+                  <button
+                    key={amenity.id}
+                    type="button"
+                    onClick={() => toggleAmenity(amenity.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '8px',
+                      border: isSelected ? '1px solid var(--accent-primary)' : '1px solid var(--border-glass)',
+                      background: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255,255,255,0.05)',
+                      color: isSelected ? 'var(--accent-secondary)' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: isSelected ? 600 : 400,
+                      transition: 'all 0.2s ease',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span>{amenity.icon}</span>
+                    <span>{amenity.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {formData.amenities.length > 0 && (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {formData.amenities.length} amenities selected
+              </p>
+            )}
           </div>
 
           <div className="input-group">
