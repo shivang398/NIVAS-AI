@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ShieldCheck, FileText, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, FileText, CheckCircle, XCircle, AlertTriangle, UserX } from 'lucide-react';
 
 const PoliceDashboardTab = ({ user }) => {
   const [verifications, setVerifications] = useState([]);
@@ -37,6 +37,21 @@ const PoliceDashboardTab = ({ user }) => {
     }
   };
 
+  const handleCriminalDiscard = async (id) => {
+    try {
+      if (!window.confirm(`WARNING: Are you sure you want to log a CRIMINAL RECORD against this applicant? This will automatically discard and permanently reject their application and any further process.`)) return;
+      
+      // Update backend to reject the application
+      const res = await axios.patch(`/verification/${id}`, { status: 'REJECTED' });
+      if (res.data.success) {
+        alert('CRIMINAL RECORD LOGGED. Applicant has been officially discarded and banned from further processing.');
+        setVerifications(prev => prev.filter(v => v.id !== id));
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || `Failed to log criminal record.`);
+    }
+  };
+
   return (
     <div className="police-tab animate-fade-in glass-card" style={{ padding: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -62,13 +77,21 @@ const PoliceDashboardTab = ({ user }) => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <h3 style={{ marginBottom: '0.5rem' }}>Applicant ID: {v.tenantId.substring(0,8)}...</h3>
-                  <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
-                    Reference Offer: {v.offerId}
-                  </p>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>Proposed Lease Details:</h4>
+                    {v.offer ? (
+                      <p style={{ margin: '0.5rem 0 0 0', fontWeight: '500' }}>
+                        {v.offer.property?.title || 'Property'} • Rent: ₹{v.offer.price}
+                      </p>
+                    ) : (
+                      <p style={{ margin: '0.5rem 0 0 0', fontWeight: '500' }}>Reference Offer: {v.offerId}</p>
+                    )}
+                  </div>
                   
                   {v.fraudCheck && (() => {
                     const trustScore = 100 - v.fraudCheck.score;
-                    const scoreColor = trustScore >= 70 ? '#4ade80' : trustScore >= 30 ? '#f59e0b' : '#ef4444';
+                    const isCriminal = trustScore < 30; // auto-detect threshold
+                    const scoreColor = trustScore > 70 ? '#4ade80' : isCriminal ? '#ef4444' : '#f59e0b';
                     let fraudReasons = [];
                     try {
                       const parsed = JSON.parse(v.fraudCheck.remarks);
@@ -86,9 +109,14 @@ const PoliceDashboardTab = ({ user }) => {
                             padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700,
                             background: `${scoreColor}22`, color: scoreColor, textTransform: 'uppercase'
                           }}>
-                            {v.fraudCheck.status}
+                            {isCriminal ? 'CRIMINAL RECORD DETECTED' : v.fraudCheck.status}
                           </span>
                         </div>
+                        {isCriminal && (
+                           <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '0.5rem', borderRadius: '8px', marginBottom: '0.5rem' }}>
+                             <strong style={{ color: '#ef4444', fontSize: '0.8rem' }}>AUTO-DETECT:</strong> <span style={{ color: '#fca5a5', fontSize: '0.8rem' }}>This applicant has been flagged as high risk/criminal. Approval is restricted.</span>
+                           </div>
+                        )}
                         {fraudReasons.length > 0 && (
                           <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: `3px solid ${scoreColor}` }}>
                             {fraudReasons.map((reason, i) => (
@@ -124,19 +152,37 @@ const PoliceDashboardTab = ({ user }) => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: '180px' }}>
-                  <button 
-                    className="btn-primary" 
-                    onClick={() => handleDecision(v.id, 'APPROVED')}
-                    style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', border: 'none', justifyContent: 'center' }}
-                  >
-                    <CheckCircle size={16} /> Approve & Sign
-                  </button>
+                  {(!v.fraudCheck || (100 - v.fraudCheck.score) >= 30) ? (
+                    <button 
+                      className="btn-primary" 
+                      onClick={() => handleDecision(v.id, 'APPROVED')}
+                      style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', border: 'none', justifyContent: 'center' }}
+                    >
+                      <CheckCircle size={16} /> Approve & Sign
+                    </button>
+                  ) : (
+                    <button 
+                      className="btn-primary" 
+                      disabled
+                      style={{ background: 'rgba(255,255,255,0.1)', color: '#9ca3af', border: 'none', justifyContent: 'center', cursor: 'not-allowed' }}
+                    >
+                      <CheckCircle size={16} /> Approval Disabled (Risk)
+                    </button>
+                  )}
                   <button 
                     className="btn-secondary" 
                     onClick={() => handleDecision(v.id, 'REJECTED')}
-                    style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)', justifyContent: 'center' }}
+                    style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)', justifyContent: 'center' }}
                   >
-                    <XCircle size={16} /> Reject Application
+                    <XCircle size={16} /> Reject Informally
+                  </button>
+                  <button 
+                    className="btn-secondary" 
+                    onClick={() => handleCriminalDiscard(v.id)}
+                    style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.5)', background: 'rgba(239,68,68,0.1)', justifyContent: 'center', fontWeight: 'bold' }}
+                    title="Log Criminal Data & Discard Applicant"
+                  >
+                    <UserX size={16} /> Mark as Criminal
                   </button>
                 </div>
               </div>

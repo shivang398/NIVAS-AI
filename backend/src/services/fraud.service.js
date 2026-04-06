@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import path from "path";
+import Tesseract from "tesseract.js";
 import prisma from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 
@@ -13,7 +15,7 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
   // Fetch verification with all uploaded documents
   const verification = await prisma.verification.findUnique({
     where: { id: verificationId },
-    include: { documents: true },
+    include: { documents: true, tenant: true },
   });
 
   if (!verification) {
@@ -83,6 +85,56 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
   if (verification.documents.length < 2) {
     score += 20;
     reasons.push("Insufficient documents uploaded (need at least Aadhaar + PAN)");
+  }
+
+  // ─── CHECK 6: OCR AI Data Extraction & Regex Matching ───────
+  for (const doc of verification.documents) {
+    const isImage = [".png", ".jpg", ".jpeg"].some(ext => doc.fileUrl.toLowerCase().endsWith(ext));
+    if (isImage) {
+      try {
+        const filePath = path.join(process.cwd(), doc.fileUrl);
+        const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
+        const extractedText = text.toUpperCase();
+
+        // Regex validations based on document type
+        if (doc.fileType === "AADHAR_CARD") {
+          const aadharRegex = /(?:\d{4}\s?\d{4}\s?\d{4})|(?:\d{12})/;
+          if (!aadharRegex.test(extractedText)) {
+            score += 20;
+            reasons.push("AI OCR: Invalid or missing Aadhar numbering format in document.");
+          }
+        } 
+        else if (doc.fileType === "PAN_CARD") {
+          const panRegex = /[A-Z]{5}[0-9]{4}[A-Z]{1}/;
+          if (!panRegex.test(extractedText)) {
+            score += 20;
+            reasons.push("AI OCR: Invalid or missing PAN numbering format in document.");
+          }
+        }
+
+        // Identity verification: Map user info
+        const userName = verification.tenant?.name?.toUpperCase() || "";
+        // Check if at least parts of the user's name appear in the document
+        const nameParts = userName.split(" ").filter(n => n.length > 2);
+        let nameMatched = false;
+        for (const part of nameParts) {
+            if (extractedText.includes(part)) {
+                nameMatched = true;
+                break;
+            }
+        }
+
+        if (!nameMatched && userName) {
+            score += 25;
+            reasons.push(`AI OCR: Registered signup name "${userName}" does not match document ${doc.fileType}.`);
+        }
+
+      } catch (err) {
+        console.error("OCR Extraction failed for", doc.fileUrl, err.message);
+        // Do not severely arbitrarily penalize if OCR dependency fails, but log it
+        reasons.push(`AI OCR: Failed to process text for ${doc.fileType}`);
+      }
+    }
   }
 
   // Cap score at 100

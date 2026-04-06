@@ -9,6 +9,7 @@ import MaintenanceTab from '../components/dashboard/MaintenanceTab';
 import VerificationTab from '../components/dashboard/VerificationTab';
 import LeasesTab from '../components/dashboard/LeasesTab';
 import PoliceDashboardTab from '../components/dashboard/PoliceDashboardTab';
+import PropertyAnalyticsTab from '../components/dashboard/PropertyAnalyticsTab';
 import '../components/AddProperty.css';
 import './Dashboard.css';
 
@@ -182,9 +183,15 @@ const Dashboard = () => {
                 <button className={`nav-tab ${activeTab === 'maintenance' ? 'active' : ''}`} onClick={() => setActiveTab('maintenance')}>
                   <Wrench size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Maintenance
                 </button>
-                <button className={`nav-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>
-                  <ShieldCheck size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Trust & NOCs
-                </button>
+                {isOwner ? (
+                  <button className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
+                    <Building size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Property Insights
+                  </button>
+                ) : (
+                  <button className={`nav-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>
+                    <ShieldCheck size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Trust & NOCs
+                  </button>
+                )}
                 <button className={`nav-tab ${activeTab === 'leases' ? 'active' : ''}`} onClick={() => setActiveTab('leases')}>
                   <FileSignature size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Leases
                 </button>
@@ -307,7 +314,8 @@ const Dashboard = () => {
           
           {activeTab === 'chat' && <ChatTab user={user} />}
           {activeTab === 'maintenance' && <MaintenanceTab isOwner={isOwner} user={user} />}
-          {activeTab === 'verification' && <VerificationTab isOwner={isOwner} />}
+          {!isOwner && activeTab === 'verification' && <VerificationTab isOwner={isOwner} />}
+          {isOwner && activeTab === 'analytics' && <PropertyAnalyticsTab />}
           {activeTab === 'leases' && <LeasesTab isOwner={isOwner} />}
 
           {activeTab === 'settings' && (

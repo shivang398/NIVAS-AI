@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { ShieldCheck, Upload, FileText } from 'lucide-react';
+import { ShieldCheck, Upload, FileText, Download } from 'lucide-react';
+import NocDocument from './NocDocument';
 
 const VerificationTab = ({ isOwner, user }) => {
   const [verifications, setVerifications] = useState([]);
   const [acceptedOffers, setAcceptedOffers] = useState([]);
   const [nocs, setNocs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedNoc, setSelectedNoc] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -176,12 +178,29 @@ const VerificationTab = ({ isOwner, user }) => {
                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>NOC Issued</div>
                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>Ref: {v.id.substring(0,8)}</div>
                  </div>
-                 <button className="btn-secondary small" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }} onClick={() => window.print()}>Download</button>
+                 <button className="btn-secondary small" style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => setSelectedNoc(v)}>
+                    <Download size={12} /> View Official NOC
+                 </button>
                </div>
              ))}
           </div>
         )}
       </div>
+
+      {selectedNoc && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.8)', zIndex: 9999,
+          overflowY: 'auto', padding: '20px'
+        }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+             <button className="btn-secondary" onClick={() => setSelectedNoc(null)} style={{ background: '#1a1a1a', color: 'white' }}>
+                Close Document
+             </button>
+          </div>
+          <NocDocument verification={selectedNoc} />
+        </div>
+      )}
     </div>
   );
 };
