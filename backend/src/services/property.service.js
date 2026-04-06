@@ -1,4 +1,5 @@
 import https from "node:https";
+import prisma from "../config/prisma.js";
 
 const geocodeLocation = (location) => {
   return new Promise((resolve) => {
@@ -142,9 +143,6 @@ export const updatePropertyService = async (
   });
 };
 
-//////////////////////////////////////////////////////
-// DELETE
-//////////////////////////////////////////////////////
 export const deletePropertyService = async (id, userId) => {
   if (!id) {
     throw new AppError("Property ID is required", 400);

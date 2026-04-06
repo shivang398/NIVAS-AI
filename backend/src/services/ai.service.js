@@ -1,7 +1,6 @@
 import prisma from "../config/prisma.js";
 import Groq from "groq-sdk";
 import { AppError } from "../utils/AppError.js";
-import { parseDescription } from "../../../frontend/src/utils/propertyParser.js"; // Wait, can't import from frontend
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
