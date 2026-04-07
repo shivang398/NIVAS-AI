@@ -30,14 +30,18 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
   const hasAadhar = uploadedTypes.includes("AADHAR_CARD");
   const hasPAN = uploadedTypes.includes("PAN_CARD");
 
-  if (!hasAadhar) {
-    score += 35;
-    reasons.push("Aadhaar Card not uploaded");
-  }
+  // Only penalize missing core documents if they've uploaded at least something else
+  // to avoid instant "Fraud" on the the first initial upload step.
+  if (verification.documents.length >= 2) {
+    if (!hasAadhar) {
+      score += 35;
+      reasons.push("Aadhaar Card not uploaded");
+    }
 
-  if (!hasPAN) {
-    score += 35;
-    reasons.push("PAN Card not uploaded");
+    if (!hasPAN) {
+      score += 35;
+      reasons.push("PAN Card not uploaded");
+    }
   }
 
   // ─── CHECK 2: File format validation ────────────────────────
@@ -83,7 +87,7 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
 
   // ─── CHECK 5: Minimum document count ────────────────────────
   if (verification.documents.length < 2) {
-    score += 20;
+    score += 15;
     reasons.push("Insufficient documents uploaded (need at least Aadhaar + PAN)");
   }
 
@@ -97,18 +101,21 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
         const extractedText = text.toUpperCase();
 
         // Regex validations based on document type
+        // Regex validations based on document type
         if (doc.fileType === "AADHAR_CARD") {
           const aadharRegex = /(?:\d{4}\s?\d{4}\s?\d{4})|(?:\d{12})/;
-          if (!aadharRegex.test(extractedText)) {
-            score += 20;
-            reasons.push("AI OCR: Invalid or missing Aadhar numbering format in document.");
+          const hasAadharWord = /AADHAAR|GOVERNMENT OF INDIA|UIDAI/.test(extractedText);
+          if (!aadharRegex.test(extractedText) && !hasAadharWord) {
+            score += 15;
+            reasons.push("AI OCR: Invalid or missing Aadhar numbering/keywords in document.");
           }
         } 
         else if (doc.fileType === "PAN_CARD") {
           const panRegex = /[A-Z]{5}[0-9]{4}[A-Z]{1}/;
-          if (!panRegex.test(extractedText)) {
-            score += 20;
-            reasons.push("AI OCR: Invalid or missing PAN numbering format in document.");
+          const hasPanWord = /INCOME TAX DEPART|INCOME TAX|PAN/.test(extractedText);
+          if (!panRegex.test(extractedText) && !hasPanWord) {
+            score += 15;
+            reasons.push("AI OCR: Invalid or missing PAN numbering/keywords in document.");
           }
         }
 
@@ -124,9 +131,10 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
             }
         }
 
-        if (!nameMatched && userName) {
-            score += 25;
-            reasons.push(`AI OCR: Registered signup name "${userName}" does not match document ${doc.fileType}.`);
+        if (!nameMatched && userName && nameParts.length > 0) {
+            // Check if perhaps an ID number was present, we don't penalize too much if name isn't perfectly read
+            score += 10;
+            reasons.push(`AI OCR: Minor Name mismatch for "${userName}" in document ${doc.fileType}.`);
         }
 
       } catch (err) {
@@ -142,8 +150,8 @@ export const runFraudCheck = async (verificationId, fileUrl) => {
 
   // ─── Determine status ───────────────────────────────────────
   let status = "SAFE";
-  if (score >= 70) status = "FRAUD";
-  else if (score >= 30) status = "SUSPICIOUS";
+  if (score >= 80) status = "FRAUD";
+  else if (score >= 45) status = "SUSPICIOUS";
 
   const remarksData = JSON.stringify({ hash, reasons });
 

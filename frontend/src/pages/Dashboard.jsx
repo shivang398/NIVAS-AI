@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Building, User, Clock, CheckCircle, MessageSquare, Wrench, ShieldCheck, FileSignature, Settings } from 'lucide-react';
+import { Plus, Building, User, Clock, CheckCircle, MessageSquare, Wrench, ShieldCheck, FileSignature, Settings, IndianRupee } from 'lucide-react';
 import AddPropertyModal from '../components/AddPropertyModal';
 import PropertyCard from '../components/PropertyCard';
 import ChatTab from '../components/dashboard/ChatTab';
@@ -10,6 +10,7 @@ import VerificationTab from '../components/dashboard/VerificationTab';
 import LeasesTab from '../components/dashboard/LeasesTab';
 import PoliceDashboardTab from '../components/dashboard/PoliceDashboardTab';
 import PropertyAnalyticsTab from '../components/dashboard/PropertyAnalyticsTab';
+import TenantRentTab from '../components/dashboard/TenantRentTab';
 import '../components/AddProperty.css';
 import './Dashboard.css';
 
@@ -185,12 +186,17 @@ const Dashboard = () => {
                 </button>
                 {isOwner ? (
                   <button className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
-                    <Building size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Property Insights
+                    <IndianRupee size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Rent Management
                   </button>
                 ) : (
-                  <button className={`nav-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>
-                    <ShieldCheck size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Trust & NOCs
-                  </button>
+                  <>
+                    <button className={`nav-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>
+                      <ShieldCheck size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Trust & NOCs
+                    </button>
+                    <button className={`nav-tab ${activeTab === 'rent' ? 'active' : ''}`} onClick={() => setActiveTab('rent')}>
+                      <IndianRupee size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Rent Payments
+                    </button>
+                  </>
                 )}
                 <button className={`nav-tab ${activeTab === 'leases' ? 'active' : ''}`} onClick={() => setActiveTab('leases')}>
                   <FileSignature size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Leases
@@ -316,6 +322,7 @@ const Dashboard = () => {
           {activeTab === 'maintenance' && <MaintenanceTab isOwner={isOwner} user={user} />}
           {!isOwner && activeTab === 'verification' && <VerificationTab isOwner={isOwner} />}
           {isOwner && activeTab === 'analytics' && <PropertyAnalyticsTab />}
+          {!isOwner && activeTab === 'rent' && <TenantRentTab />}
           {activeTab === 'leases' && <LeasesTab isOwner={isOwner} />}
 
           {activeTab === 'settings' && (
