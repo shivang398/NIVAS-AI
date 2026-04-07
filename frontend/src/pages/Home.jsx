@@ -16,7 +16,7 @@ const Home = () => {
           <div className="hero-content">
             <div className="hero-badge animate-fade-in animate-delay-1">
               <Star size={14} className="text-secondary" />
-              <span>The #1 AI Real Estate Platform</span>
+              <span>The #1 Real Estate Platform</span>
             </div>
             
             <h1 className="hero-title animate-fade-in animate-delay-2">
@@ -26,7 +26,7 @@ const Home = () => {
             </h1>
             
             <p className="hero-subtitle animate-fade-in animate-delay-3">
-              Nivas AI connects tenants and owners through intelligent matching, secure digital negotiations, and automated verifications. Ditch the paperwork.
+              Nivas connects tenants and owners through intelligent matching, secure digital negotiations, and automated verifications. Ditch the paperwork.
             </p>
             
             <div className="hero-actions animate-fade-in animate-delay-4">
@@ -78,7 +78,7 @@ const Home = () => {
               <HomeIcon className="feature-icon" />
             </div>
             <h3>Smart Discovery</h3>
-            <p>Find your next home with AI-powered matching algorithms built specifically for your needs.</p>
+            <p>Find your next home with intelligent matching algorithms built specifically for your needs.</p>
           </div>
           
           <div className="glass-card feature-card shadow-hover animate-fade-in animate-delay-2">

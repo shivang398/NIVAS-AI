@@ -111,58 +111,77 @@ const MaintenanceTab = ({ isOwner, user }) => {
   if (loading) return <div className="text-secondary p-4">Loading Maintenance Hub...</div>;
 
   return (
-    <div className="maintenance-tab animate-fade-in glass-card" style={{ padding: '2rem' }}>
-      <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-        <Wrench size={24} /> Maintenance Hub
-      </h2>
+    <div className="maintenance-tab animate-fade-in glass-card" style={{ padding: '2.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0, fontSize: '1.75rem' }}>
+            <Wrench size={28} className="text-gradient" /> 
+            Maintenance Hub
+          </h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>Manage property repairs and service requests in real-time.</p>
+        </div>
+      </div>
       
       {/* Tenant: Report an Issue Form */}
       {!isOwner && (
-        <form onSubmit={handleSubmit} className="mb-4" style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-          <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={18} /> Report an Issue
+        <form onSubmit={handleSubmit} style={{ 
+          marginBottom: '2.5rem', 
+          padding: '2rem', 
+          background: 'rgba(255,255,255,0.02)', 
+          borderRadius: '24px', 
+          border: '1px solid var(--border-glass)',
+          boxShadow: 'inset 0 0 20px rgba(255,255,255,0.02)'
+        }}>
+          <h4 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem' }}>
+            <AlertCircle size={20} className="text-secondary" /> Submit New Request
           </h4>
 
           {tenantProperties.length === 0 && (
-            <p style={{ color: '#f59e0b', marginBottom: '1rem', fontSize: '0.9rem' }}>
-              ⚠️ No active leases found. You need an active lease to submit maintenance requests.
-            </p>
+            <div style={{ 
+              padding: '1rem', 
+              background: 'rgba(245, 158, 11, 0.1)', 
+              borderRadius: '12px', 
+              border: '1px solid rgba(245, 158, 11, 0.2)',
+              marginBottom: '1.5rem',
+              color: '#f59e0b',
+              fontSize: '0.85rem'
+            }}>
+              ⚠️ Verification protocol active: An active smart lease is required to submit maintenance requests.
+            </div>
           )}
 
           <div className="input-group">
             <textarea 
               className="input-field" 
-              placeholder="Describe the issue in detail..." 
+              placeholder="Provide a detailed description of the maintenance requirement..." 
               required
               rows={3}
-              style={{ resize: 'vertical', minHeight: '70px', width: '100%', fontFamily: 'inherit' }}
+              style={{ resize: 'vertical', minHeight: '80px', width: '100%', padding: '1rem' }}
               value={formData.issue} 
               onChange={e => setFormData({...formData, issue: e.target.value})}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-            {/* Priority select with backend-valid values */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
             <select 
               className="input-field" 
               value={formData.priority} 
               onChange={e => setFormData({...formData, priority: e.target.value})}
-              style={{ flex: '1', minWidth: '150px' }}
+              style={{ padding: '0.75rem' }}
             >
               <option value="low">🟢 Low Priority</option>
               <option value="medium">🟡 Medium Priority</option>
               <option value="high">🔴 High Priority</option>
             </select>
 
-            {/* Property dropdown from active leases */}
             <select
               className="input-field"
               value={formData.propertyId}
               onChange={e => setFormData({...formData, propertyId: e.target.value})}
               required
-              style={{ flex: '2', minWidth: '200px' }}
+              style={{ padding: '0.75rem' }}
             >
-              <option value="">-- Select Property --</option>
+              <option value="">-- Targeted Unit --</option>
               {tenantProperties.map(p => (
                 <option key={p.id} value={p.id}>{p.title}</option>
               ))}
@@ -172,21 +191,22 @@ const MaintenanceTab = ({ isOwner, user }) => {
               type="submit" 
               className="btn-primary" 
               disabled={submitting || tenantProperties.length === 0}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (submitting || tenantProperties.length === 0) ? 0.6 : 1 }}
+              style={{ height: '100%', opacity: (submitting || tenantProperties.length === 0) ? 0.6 : 1 }}
             >
               {submitting ? <Loader2 size={18} className="spin" /> : <Wrench size={18} />}
-              {submitting ? 'Submitting...' : 'Submit'}
+              {submitting ? 'Processing...' : 'Deploy Request'}
             </button>
           </div>
         </form>
       )}
 
       {/* Requests List */}
-      <div className="requests-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="requests-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {requests.length === 0 && (
-          <p className="text-secondary" style={{ textAlign: 'center', padding: '2rem' }}>
-            No maintenance requests found.
-          </p>
+          <div style={{ textAlign: 'center', padding: '4rem', opacity: 0.5 }}>
+            <Wrench size={48} style={{ margin: '0 auto 1.5rem', opacity: 0.2 }} />
+            <p className="text-secondary">Maintenance log remains clear. No active tickets.</p>
+          </div>
         )}
         {requests.map(req => (
           <div 
@@ -195,68 +215,81 @@ const MaintenanceTab = ({ isOwner, user }) => {
             style={{ 
               padding: '1.5rem', 
               border: '1px solid var(--border-glass)', 
-              borderRadius: '12px', 
+              borderRadius: '20px', 
               display: 'flex', 
               justifyContent: 'space-between', 
               alignItems: 'center',
-              borderLeft: `4px solid ${getStatusColor(req.status)}`,
-              background: 'rgba(0,0,0,0.1)',
+              borderLeft: `5px solid ${getStatusColor(req.status)}`,
+              background: 'rgba(255,255,255,0.01)',
               flexWrap: 'wrap',
-              gap: '1rem'
+              gap: '1.5rem',
+              transition: 'transform 0.2s ease'
             }}
           >
-            <div style={{ flex: 1 }}>
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                {getStatusIcon(req.status)}
-                <span>{req.issue}</span>
-                <span 
-                  style={{ 
-                    padding: '0.2rem 0.6rem', 
-                    borderRadius: '6px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 600,
-                    background: `${getStatusColor(req.status)}22`,
-                    color: getStatusColor(req.status),
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  {req.status.replace('_', ' ')}
+            <div style={{ flex: 1, minWidth: '250px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div style={{ background: `${getStatusColor(req.status)}15`, padding: '0.5rem', borderRadius: '10px' }}>
+                  {getStatusIcon(req.status)}
+                </div>
+                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>{req.issue}</h4>
+              </div>
+              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  Priority: <strong style={{ color: getPriorityColor(req.priority), textTransform: 'uppercase' }}>{req.priority}</strong>
                 </span>
-              </h4>
-              <p className="text-secondary" style={{ fontSize: '0.9rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <span>Priority: <strong style={{ color: getPriorityColor(req.priority) }}>{req.priority}</strong></span>
-                <span>•</span>
-                <span>Created: {new Date(req.createdAt).toLocaleDateString()}</span>
-              </p>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>•</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Clock size={12} /> Logged {new Date(req.createdAt).toLocaleDateString()}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>•</span>
+                <span style={{ 
+                  fontSize: '0.75rem', 
+                  color: getStatusColor(req.status), 
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>{req.status.replace('_', ' ')}</span>
+              </div>
             </div>
 
             {/* Owner: Status update buttons */}
             {isOwner && req.status !== 'resolved' && (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
                 {req.status === 'open' && (
                   <button 
-                    className="btn-secondary small" 
-                    style={{ borderColor: '#818cf8', color: '#818cf8', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                    className="btn-secondary" 
+                    style={{ borderColor: '#818cf8', color: '#818cf8', padding: '0.5rem 1rem', fontSize: '0.85rem', borderRadius: '10px' }}
                     onClick={() => handleUpdateStatus(req.id, 'in_progress')}
                   >
-                    Mark In Progress
+                    Deploy Technician
                   </button>
                 )}
                 <button 
-                  className="btn-secondary small" 
-                  style={{ borderColor: '#4ade80', color: '#4ade80', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                  className="btn-primary" 
+                  style={{ background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80', padding: '0.5rem 1.25rem', fontSize: '0.85rem', borderRadius: '10px', border: '1px solid rgba(74, 222, 128, 0.4)' }}
                   onClick={() => handleUpdateStatus(req.id, 'resolved')}
                 >
-                  Mark Resolved
+                  Confirm Resolution
                 </button>
               </div>
             )}
 
             {/* Resolved badge for resolved items */}
             {req.status === 'resolved' && (
-              <span style={{ color: '#4ade80', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <CheckCircle size={16} /> Resolved
-              </span>
+              <div style={{ 
+                background: 'rgba(74, 222, 128, 0.1)', 
+                color: '#4ade80', 
+                padding: '0.5rem 1rem', 
+                borderRadius: '12px',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                border: '1px solid rgba(74, 222, 128, 0.2)'
+              }}>
+                <CheckCircle size={18} /> Ticket Resolved
+              </div>
             )}
           </div>
         ))}

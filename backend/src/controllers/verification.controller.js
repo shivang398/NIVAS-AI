@@ -50,7 +50,8 @@ export const reviewVerification = asyncHandler(async (req, res) => {
 });
 
 export const getVerifications = asyncHandler(async (req, res) => {
-  const data = await getVerificationService(req.user);
+  const { status } = req.query;
+  const data = await getVerificationService(req.user, status);
 
   return success(res, data, "Verifications fetched");
 });

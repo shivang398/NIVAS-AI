@@ -81,6 +81,23 @@
   to { transform: rotate(360deg); }
 }
 
+.filter-btn.filter-active {
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #c084fc !important;
+}
+
+.filter-panel input[type="number"]:focus,
+.filter-panel select:focus {
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+}
+
+.filter-panel select option {
+  background: #1a1a2e;
+  color: white;
+}
+
 @media (max-width: 768px) {
   .search-filter-bar {
     flex-direction: column;
@@ -89,5 +106,9 @@
   .filter-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .filter-panel > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
   }
 }

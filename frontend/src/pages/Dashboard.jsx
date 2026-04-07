@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Building, User, Clock, CheckCircle, MessageSquare, Wrench, ShieldCheck, FileSignature, Settings, IndianRupee } from 'lucide-react';
+import { Plus, Building, User, Clock, CheckCircle, MessageSquare, Wrench, ShieldCheck, FileSignature, Settings, LayoutDashboard } from 'lucide-react';
 import AddPropertyModal from '../components/AddPropertyModal';
 import PropertyCard from '../components/PropertyCard';
 import ChatTab from '../components/dashboard/ChatTab';
@@ -9,8 +9,7 @@ import MaintenanceTab from '../components/dashboard/MaintenanceTab';
 import VerificationTab from '../components/dashboard/VerificationTab';
 import LeasesTab from '../components/dashboard/LeasesTab';
 import PoliceDashboardTab from '../components/dashboard/PoliceDashboardTab';
-import PropertyAnalyticsTab from '../components/dashboard/PropertyAnalyticsTab';
-import TenantRentTab from '../components/dashboard/TenantRentTab';
+
 import '../components/AddProperty.css';
 import './Dashboard.css';
 
@@ -159,47 +158,38 @@ const Dashboard = () => {
             ) : (
               <>
                 <button className={`nav-tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-                  Overview
+                  <LayoutDashboard size={16} /> Overview
                 </button>
                 {isOwner ? (
                   <>
                     <button className={`nav-tab ${activeTab === 'properties' ? 'active' : ''}`} onClick={() => setActiveTab('properties')}>
-                      My Properties
+                      <Building size={16} /> My Properties
                     </button>
                     <button className={`nav-tab ${activeTab === 'applications' ? 'active' : ''}`} onClick={() => setActiveTab('applications')}>
-                      Applications
+                      <Clock size={16} /> Applications
                     </button>
                   </>
                 ) : (
                   <>
                     <button className={`nav-tab ${activeTab === 'applications' ? 'active' : ''}`} onClick={() => setActiveTab('applications')}>
-                      My Applications
+                      <Clock size={16} /> My Applications
                     </button>
                   </>
                 )}
                 
                 <button className={`nav-tab ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>
-                  <MessageSquare size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Negotiations
+                  <MessageSquare size={16} /> Negotiations
                 </button>
                 <button className={`nav-tab ${activeTab === 'maintenance' ? 'active' : ''}`} onClick={() => setActiveTab('maintenance')}>
-                  <Wrench size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Maintenance
+                  <Wrench size={16} /> Maintenance
                 </button>
-                {isOwner ? (
-                  <button className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
-                    <IndianRupee size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Rent Management
+                {!isOwner && (
+                  <button className={`nav-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>
+                    <ShieldCheck size={16} /> Trust & NOCs
                   </button>
-                ) : (
-                  <>
-                    <button className={`nav-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>
-                      <ShieldCheck size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Trust & NOCs
-                    </button>
-                    <button className={`nav-tab ${activeTab === 'rent' ? 'active' : ''}`} onClick={() => setActiveTab('rent')}>
-                      <IndianRupee size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Rent Payments
-                    </button>
-                  </>
                 )}
                 <button className={`nav-tab ${activeTab === 'leases' ? 'active' : ''}`} onClick={() => setActiveTab('leases')}>
-                  <FileSignature size={16} style={{ marginRight: '0.5rem', display: 'inline' }} /> Leases
+                  <FileSignature size={16} /> Leases
                 </button>
               </>
             )}
@@ -239,10 +229,82 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="recent-activity glass-card mt-2">
-                <h3>Recent Activity</h3>
-                <div className="activity-placeholder">
-                  <p>No recent activity to show.</p>
+              <div className="recent-activity-section mt-2">
+                <div className="glass-card" style={{ padding: '2rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>System Activity Log</h3>
+                    <button className="btn-secondary small" style={{ fontSize: '0.75rem' }}>View History</button>
+                  </div>
+                  
+                  <div className="activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {isOwner ? (
+                      <>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '0.65rem', borderRadius: '10px', height: 'fit-content' }}>
+                            <Building size={18} color="#818cf8" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>New Property Indexed</p>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '0.2rem' }}>Your property "Luxury Sky Penthouse" is now live and searchable by verified tenants.</p>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>2m ago</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                          <div style={{ background: 'rgba(236, 72, 153, 0.1)', padding: '0.65rem', borderRadius: '10px', height: 'fit-content' }}>
+                            <MessageSquare size={18} color="#ec4899" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>Incoming Negotiation Request</p>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '0.2rem' }}>A prospective tenant has proposed a price adjustment for Offer #OFF452.</p>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>4h ago</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                          <div style={{ background: 'rgba(74, 222, 128, 0.1)', padding: '0.65rem', borderRadius: '10px', height: 'fit-content' }}>
+                            <ShieldCheck size={18} color="#4ade80" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>Identity Verified: Tenant</p>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '0.2rem' }}>John Doe's identity papers have been cryptographically verified through our secure layer.</p>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>1d ago</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '0.65rem', borderRadius: '10px', height: 'fit-content' }}>
+                            <ShieldCheck size={18} color="#818cf8" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>NOC Certificate Issued</p>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '0.2rem' }}>Your digital No-Objection Certificate has been successfully generated for the current cycle.</p>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>Just now</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                          <div style={{ background: 'rgba(74, 222, 128, 0.1)', padding: '0.65rem', borderRadius: '10px', height: 'fit-content' }}>
+                            <FileSignature size={18} color="#4ade80" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>Digital Lease Stamped</p>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '0.2rem' }}>A new smart-agreement has been locked onto the secure ledger for Property ID #V3B4N2.</p>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>3h ago</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                          <div style={{ background: 'rgba(236, 72, 153, 0.1)', padding: '0.65rem', borderRadius: '10px', height: 'fit-content' }}>
+                            <Clock size={18} color="#ec4899" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>Background Check Pending</p>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '0.2rem' }}>Your application #APP-998 is currently awaiting external police department approval.</p>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.3 }}>6h ago</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -321,8 +383,6 @@ const Dashboard = () => {
           {activeTab === 'chat' && <ChatTab user={user} />}
           {activeTab === 'maintenance' && <MaintenanceTab isOwner={isOwner} user={user} />}
           {!isOwner && activeTab === 'verification' && <VerificationTab isOwner={isOwner} />}
-          {isOwner && activeTab === 'analytics' && <PropertyAnalyticsTab />}
-          {!isOwner && activeTab === 'rent' && <TenantRentTab />}
           {activeTab === 'leases' && <LeasesTab isOwner={isOwner} />}
 
           {activeTab === 'settings' && (

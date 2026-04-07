@@ -5,19 +5,22 @@ import { ShieldCheck, FileText, CheckCircle, XCircle, AlertTriangle, UserX } fro
 const PoliceDashboardTab = ({ user }) => {
   const [verifications, setVerifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('queue');
 
   useEffect(() => {
-    fetchQueue();
-  }, []);
+    fetchData();
+  }, [activeTab]);
 
-  const fetchQueue = async () => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const res = await axios.get('/verification');
+      const endpoint = activeTab === 'queue' ? '/verification' : '/verification?status=APPROVED';
+      const res = await axios.get(endpoint);
       if (res.data.success) {
         setVerifications(res.data.data);
       }
     } catch (err) {
-      console.error("Failed to fetch verification queue", err);
+      console.error("Failed to fetch verification data", err);
     } finally {
       setLoading(false);
     }
@@ -54,12 +57,55 @@ const PoliceDashboardTab = ({ user }) => {
 
   return (
     <div className="police-tab animate-fade-in glass-card" style={{ padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>Verification Queue</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2>{activeTab === 'queue' ? 'Verification Queue' : 'Verified Tenants History'}</h2>
         <div className="role-badge" style={{ backgroundColor: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', fontWeight: 600, padding: '0.5rem 1rem', borderRadius: '2rem', display: 'flex', alignItems: 'center' }}>
           <ShieldCheck size={16} style={{ marginRight: '6px' }}/> 
           Authorized Police Portal
         </div>
+      </div>
+      
+      <div style={{ 
+        display: 'inline-flex', 
+        background: 'rgba(255,255,255,0.03)', 
+        padding: '0.3rem', 
+        borderRadius: '0.75rem', 
+        marginBottom: '2rem',
+        border: '1px solid rgba(255,255,255,0.05)'
+      }}>
+        <button 
+          onClick={() => setActiveTab('queue')}
+          style={{
+            padding: '0.6rem 1.5rem',
+            background: activeTab === 'queue' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+            color: activeTab === 'queue' ? '#818cf8' : '#94a3b8',
+            border: activeTab === 'queue' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent',
+            borderRadius: '0.5rem',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            marginRight: '0.3rem'
+          }}
+        >
+          Pending Queue
+        </button>
+        <button 
+          onClick={() => setActiveTab('history')}
+          style={{
+            padding: '0.6rem 1.5rem',
+            background: activeTab === 'history' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+            color: activeTab === 'history' ? '#818cf8' : '#94a3b8',
+            border: activeTab === 'history' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent',
+            borderRadius: '0.5rem',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          Verified Tenants DB
+        </button>
       </div>
 
       {loading ? (
@@ -67,8 +113,8 @@ const PoliceDashboardTab = ({ user }) => {
       ) : verifications.length === 0 ? (
         <div className="empty-state text-center" style={{ padding: '4rem 2rem' }}>
           <ShieldCheck size={48} className="text-secondary" style={{ marginBottom: '1rem', opacity: 0.3 }} />
-          <h3>All Clear</h3>
-          <p className="text-secondary">There are no pending background checks in your jurisdiction.</p>
+          <h3>{activeTab === 'queue' ? 'All Clear' : 'No Records Found'}</h3>
+          <p className="text-secondary">{activeTab === 'queue' ? 'There are no pending background checks in your jurisdiction.' : 'No verified tenants found in the database.'}</p>
         </div>
       ) : (
         <div className="verification-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -88,47 +134,7 @@ const PoliceDashboardTab = ({ user }) => {
                     )}
                   </div>
                   
-                  {v.fraudCheck && (() => {
-                    const trustScore = 100 - v.fraudCheck.score;
-                    const isCriminal = trustScore < 30; // auto-detect threshold
-                    const scoreColor = trustScore > 70 ? '#4ade80' : isCriminal ? '#ef4444' : '#f59e0b';
-                    let fraudReasons = [];
-                    try {
-                      const parsed = JSON.parse(v.fraudCheck.remarks);
-                      fraudReasons = parsed.reasons || [];
-                    } catch { fraudReasons = []; }
 
-                    return (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                          <AlertTriangle size={16} color={scoreColor} />
-                          <span style={{ fontSize: '0.95rem', fontWeight: 600, color: scoreColor }}>
-                            AI Trust Score: {trustScore}/100
-                          </span>
-                          <span style={{ 
-                            padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700,
-                            background: `${scoreColor}22`, color: scoreColor, textTransform: 'uppercase'
-                          }}>
-                            {isCriminal ? 'CRIMINAL RECORD DETECTED' : v.fraudCheck.status}
-                          </span>
-                        </div>
-                        {isCriminal && (
-                           <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '0.5rem', borderRadius: '8px', marginBottom: '0.5rem' }}>
-                             <strong style={{ color: '#ef4444', fontSize: '0.8rem' }}>AUTO-DETECT:</strong> <span style={{ color: '#fca5a5', fontSize: '0.8rem' }}>This applicant has been flagged as high risk/criminal. Approval is restricted.</span>
-                           </div>
-                        )}
-                        {fraudReasons.length > 0 && (
-                          <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: `3px solid ${scoreColor}` }}>
-                            {fraudReasons.map((reason, i) => (
-                              <p key={i} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.2rem 0' }}>
-                                ⚠ {reason}
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
 
                   <div className="documents-list" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     {v.documents?.map(doc => {
@@ -151,8 +157,8 @@ const PoliceDashboardTab = ({ user }) => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: '180px' }}>
-                  {(!v.fraudCheck || (100 - v.fraudCheck.score) >= 30) ? (
+                {activeTab === 'queue' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: '180px' }}>
                     <button 
                       className="btn-primary" 
                       onClick={() => handleDecision(v.id, 'APPROVED')}
@@ -160,31 +166,40 @@ const PoliceDashboardTab = ({ user }) => {
                     >
                       <CheckCircle size={16} /> Approve & Sign
                     </button>
-                  ) : (
                     <button 
-                      className="btn-primary" 
-                      disabled
-                      style={{ background: 'rgba(255,255,255,0.1)', color: '#9ca3af', border: 'none', justifyContent: 'center', cursor: 'not-allowed' }}
+                      className="btn-secondary" 
+                      onClick={() => handleDecision(v.id, 'REJECTED')}
+                      style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)', justifyContent: 'center' }}
                     >
-                      <CheckCircle size={16} /> Approval Disabled (Risk)
+                      <XCircle size={16} /> Reject Informally
                     </button>
-                  )}
-                  <button 
-                    className="btn-secondary" 
-                    onClick={() => handleDecision(v.id, 'REJECTED')}
-                    style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)', justifyContent: 'center' }}
-                  >
-                    <XCircle size={16} /> Reject Informally
-                  </button>
-                  <button 
-                    className="btn-secondary" 
-                    onClick={() => handleCriminalDiscard(v.id)}
-                    style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.5)', background: 'rgba(239,68,68,0.1)', justifyContent: 'center', fontWeight: 'bold' }}
-                    title="Log Criminal Data & Discard Applicant"
-                  >
-                    <UserX size={16} /> Mark as Criminal
-                  </button>
-                </div>
+                    <button 
+                      className="btn-secondary" 
+                      onClick={() => handleCriminalDiscard(v.id)}
+                      style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.5)', background: 'rgba(239,68,68,0.1)', justifyContent: 'center', fontWeight: 'bold' }}
+                      title="Log Criminal Data & Discard Applicant"
+                    >
+                      <UserX size={16} /> Mark as Criminal
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '180px' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem', 
+                      padding: '0.5rem 1rem', 
+                      background: 'rgba(34, 197, 94, 0.1)', 
+                      border: '1px solid rgba(34, 197, 94, 0.3)', 
+                      borderRadius: '2rem', 
+                      color: '#4ade80',
+                      boxShadow: '0 4px 14px rgba(34, 197, 94, 0.1)',
+                    }}>
+                      <CheckCircle size={16} />
+                      <strong style={{ fontSize: '0.85rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>VERIFIED SECURE</strong>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}

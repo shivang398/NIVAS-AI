@@ -18,7 +18,7 @@ const Navbar = () => {
       <div className="nav-brand">
         <Link to="/" className="brand-link">
           <Home className="brand-icon" />
-          <span className="brand-text text-gradient">Nivas-AI</span>
+          <span className="brand-text text-gradient">Nivas</span>
         </Link>
       </div>
       

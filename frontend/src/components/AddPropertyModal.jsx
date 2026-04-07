@@ -79,113 +79,121 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content glass-card animate-fade-in">
-        <button className="close-btn" onClick={onClose}><X size={20} /></button>
-        <h2 className="modal-title">List <span className="text-gradient">New Property</span></h2>
+        <button className="close-btn" onClick={onClose}><X size={24} /></button>
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 className="modal-title" style={{ margin: 0, fontSize: '1.75rem' }}>List <span className="text-gradient">New Property</span></h2>
+          <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>Onboard your unit to the Nivas AI ecosystem.</p>
+        </div>
         
-        <form onSubmit={handleSubmit} className="add-property-form">
+        <form onSubmit={handleSubmit} className="add-property-form" style={{ gap: '1.25rem' }}>
           <div className="input-group">
-            <label className="input-label">Property Title</label>
+            <label className="input-label">Title / Heading</label>
             <div className="input-wrapper">
               <Home className="input-icon" size={18} />
-              <input type="text" name="title" className="input-field with-icon" required value={formData.title} onChange={handleChange} placeholder="e.g. Luxury Sky Penthouse" />
+              <input type="text" name="title" className="input-field with-icon" required value={formData.title} onChange={handleChange} placeholder="e.g. Modern Executive Suite" />
             </div>
           </div>
           
-          <div className="form-row">
+          <div className="form-row" style={{ gap: '1.25rem' }}>
             <div className="input-group flex-1">
-              <label className="input-label">Monthly Rent (₹)</label>
+              <label className="input-label">Monthly Rent</label>
               <div className="input-wrapper">
                 <IndianRupee className="input-icon" size={18} />
-                <input type="number" name="price" className="input-field with-icon" required value={formData.price} onChange={handleChange} placeholder="e.g. 2500" />
+                <input type="number" name="price" className="input-field with-icon" required value={formData.price} onChange={handleChange} placeholder="Rent amount" />
               </div>
             </div>
             
             <div className="input-group flex-1">
-              <label className="input-label">Location</label>
+              <label className="input-label">Precise Location</label>
               <div className="input-wrapper">
                 <MapPin className="input-icon" size={18} />
-                <input type="text" name="location" className="input-field with-icon" required value={formData.location} onChange={handleChange} placeholder="City, Neighborhood" />
+                <input type="text" name="location" className="input-field with-icon" required value={formData.location} onChange={handleChange} placeholder="City, Area" />
               </div>
             </div>
           </div>
           
-          <div className="form-row">
+          <div className="form-row" style={{ gap: '1.25rem' }}>
             <div className="input-group flex-1">
-              <label className="input-label">Beds</label>
-              <input type="number" name="beds" className="input-field" min="0" value={formData.beds} onChange={handleChange} />
+              <label className="input-label">Configuration</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="number" name="beds" className="input-field" min="0" value={formData.beds} onChange={handleChange} placeholder="Beds" style={{ flex: 1 }} />
+                <input type="number" name="baths" className="input-field" min="0" value={formData.baths} onChange={handleChange} placeholder="Baths" style={{ flex: 1 }} />
+              </div>
             </div>
             
             <div className="input-group flex-1">
-              <label className="input-label">Baths</label>
-              <input type="number" name="baths" className="input-field" min="0" value={formData.baths} onChange={handleChange} />
-            </div>
-            
-            <div className="input-group flex-1">
-              <label className="input-label">Sqft</label>
-              <input type="number" name="sqft" className="input-field" placeholder="e.g. 1200" value={formData.sqft} onChange={handleChange} />
+              <label className="input-label">Total Area (Sqft)</label>
+              <input type="number" name="sqft" className="input-field" placeholder="e.g. 1450" value={formData.sqft} onChange={handleChange} />
             </div>
           </div>
 
-          {/* Amenities Section */}
           <div className="input-group">
-            <label className="input-label">Amenities</label>
-            <div style={{ 
+            <label className="input-label">Property Type</label>
+            <select name="type" className="input-field" value={formData.type} onChange={handleChange}>
+              <option value="Apartment">Apartment / Flat</option>
+              <option value="House">Independent House</option>
+              <option value="Villa">Luxury Villa</option>
+              <option value="Studio">Studio / Loft</option>
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Infrastructure & Amenities</label>
+            <div className="amenities-container" style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
-              gap: '0.5rem', 
-              marginTop: '0.5rem' 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', 
+              gap: '0.75rem', 
+              marginTop: '0.75rem' 
             }}>
               {AMENITIES_LIST.map(amenity => {
                 const isSelected = formData.amenities.includes(amenity.id);
                 return (
-                  <button
+                  <div
                     key={amenity.id}
-                    type="button"
                     onClick={() => toggleAmenity(amenity.id)}
+                    className={`amenity-chip ${isSelected ? 'active' : ''}`}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '8px',
-                      border: isSelected ? '1px solid var(--accent-primary)' : '1px solid var(--border-glass)',
-                      background: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255,255,255,0.05)',
-                      color: isSelected ? 'var(--accent-secondary)' : 'var(--text-secondary)',
+                      gap: '0.6rem',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '12px',
+                      border: isSelected ? '1px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.05)',
+                      background: isSelected ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)',
+                      color: isSelected ? '#818cf8' : 'var(--text-secondary)',
                       cursor: 'pointer',
-                      fontSize: '0.8rem',
-                      fontWeight: isSelected ? 600 : 400,
-                      transition: 'all 0.2s ease',
+                      fontSize: '0.75rem',
+                      fontWeight: isSelected ? 700 : 500,
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                       textAlign: 'left'
                     }}
                   >
-                    <span>{amenity.icon}</span>
+                    <span style={{ fontSize: '1rem' }}>{amenity.icon}</span>
                     <span>{amenity.label}</span>
-                  </button>
+                  </div>
                 );
               })}
             </div>
-            {formData.amenities.length > 0 && (
-              <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                {formData.amenities.length} amenities selected
-              </p>
-            )}
           </div>
 
           <div className="input-group">
-            <label className="input-label">Description</label>
-            <textarea name="description" className="input-field textarea-field" rows="4" required value={formData.description} onChange={handleChange} placeholder="Describe the key features and amenities..."></textarea>
+            <label className="input-label">Marketing Highlights</label>
+            <textarea name="description" className="input-field textarea-field" rows="3" required value={formData.description} onChange={handleChange} placeholder="Highlight the key benefits of this property..."></textarea>
           </div>
 
           <div 
             className="upload-area" 
             onClick={() => fileInputRef.current?.click()}
           >
-            <UploadCloud size={32} className="text-secondary" />
-            <p>
-              {selectedFiles.length > 0 
-                ? `${selectedFiles.length} file(s) selected` 
-                : <span>Drag & drop images here or <strong>browse</strong></span>}
-            </p>
+            <UploadCloud size={28} className={selectedFiles.length > 0 ? 'text-gradient' : 'text-secondary'} />
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>
+                {selectedFiles.length > 0 
+                  ? `${selectedFiles.length} Images Selected` 
+                  : 'Capture & Upload Images'}
+              </p>
+              <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.7rem', opacity: 0.5 }}>Supported formats: JPG, PNG, WEBP</p>
+            </div>
             <input 
               type="file" 
               multiple 
@@ -196,8 +204,8 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
             />
           </div>
 
-          <button type="submit" className="btn-primary form-submit-btn w-100" disabled={loading}>
-            {loading ? "Publishing..." : "Publish Listing"}
+          <button type="submit" className="btn-primary form-submit-btn" style={{ padding: '1rem', width: '100%', borderRadius: '14px', fontSize: '1rem' }} disabled={loading}>
+            {loading ? "Synchronizing..." : "Initialize Property Listing"}
           </button>
         </form>
       </div>

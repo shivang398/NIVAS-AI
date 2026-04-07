@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 // Configure Axios Defaults globally
-axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const AuthContext = createContext();
 

@@ -5,7 +5,7 @@ import './AIAssistant.css';
 
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([{ sender: 'ai', text: 'Hello! I am Nivas AI. How can I help you today?' }]);
+  const [messages, setMessages] = useState([{ sender: 'ai', text: 'Hello! I am Nivas. How can I help you today?' }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);

@@ -55,33 +55,36 @@ const PropertyCard = ({ property, index }) => {
         </div>
         
         <div className="property-content">
-          <div className="property-price">
-            <span className="text-gradient">₹{property.price}</span>
-            <span className="price-term">/mo</span>
-          </div>
-          
-          <h3 className="property-title">{property.title}</h3>
-          
-          <div className="property-location-row">
-            <div className="property-location">
-              <MapPin size={16} />
-              <span>{property.location}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
+            <div className="property-price">
+              <span className="text-gradient">₹{property.price.toLocaleString()}</span>
+              <span className="price-term">/mo</span>
             </div>
             {(property.latitude && property.longitude) && (
               <button 
                 className="mini-map-toggle" 
                 onClick={toggleMiniMap}
                 title={showMiniMap ? "Hide Map" : "Show Map"}
+                style={{ marginTop: '4px' }}
               >
                 {showMiniMap ? <ChevronUp size={16} /> : <MapIcon size={16} />}
               </button>
             )}
           </div>
           
+          <h3 className="property-title">{property.title}</h3>
+          
+          <div className="property-location-row">
+            <div className="property-location">
+              <MapPin size={14} className="text-secondary" />
+              <span>{property.location}</span>
+            </div>
+          </div>
+          
           <div className="property-features">
-            <div className="feature"><Bed size={16} /><span>{parsed.beds} Beds</span></div>
-            <div className="feature"><Bath size={16} /><span>{parsed.baths} Baths</span></div>
-            <div className="feature"><Square size={16} /><span>{parsed.sqft} sqft</span></div>
+            <div className="feature"><Bed size={14} /><span>{parsed.beds} Beds</span></div>
+            <div className="feature"><Bath size={14} /><span>{parsed.baths} Baths</span></div>
+            <div className="feature"><Square size={14} /><span>{parsed.sqft} sqft</span></div>
           </div>
         </div>
       </Link>

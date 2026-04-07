@@ -15,6 +15,7 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isApplying, setIsApplying] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -62,8 +63,9 @@ const PropertyDetails = () => {
   if (error || !property) return <div className="loading-state"><p>{error || "Property not found"}</p><Link to="/properties" className="btn-secondary">Go Back</Link></div>;
 
   const parsed = parseDescription(property.description);
-  const image = property.imageUrls && property.imageUrls.length > 0 
-    ? `http://localhost:5000/uploads/${property.imageUrls[0]}`
+  const hasImages = property.imageUrls && property.imageUrls.length > 0;
+  const image = hasImages 
+    ? `http://localhost:5000/uploads/${property.imageUrls[activeImageIndex]}`
     : "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
 
   return (
@@ -76,6 +78,20 @@ const PropertyDetails = () => {
         <img src={image} alt={property.title} className="details-image" />
         <div className="details-badge">{parsed.type}</div>
       </div>
+
+      {property.imageUrls && property.imageUrls.length > 1 && (
+        <div className="property-thumbnails">
+          {property.imageUrls.map((img, index) => (
+            <img 
+              key={index} 
+              src={`http://localhost:5000/uploads/${img}`} 
+              alt={`${property.title} view ${index + 1}`}
+              className={`thumbnail-image ${index === activeImageIndex ? 'active' : ''}`}
+              onClick={() => setActiveImageIndex(index)}
+            />
+          ))}
+        </div>
+      )}
       
       <div className="details-grid">
         <div className="details-main">

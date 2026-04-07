@@ -3,6 +3,8 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import path from "path";
+import { fileURLToPath } from "url";
 import logger from "./utils/logger.js";
 
 // 🔥 Routes
@@ -19,6 +21,9 @@ import aiRoutes from "./routes/ai.routes.js";
 // 🔐 Middleware
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import { allowRoles } from "./middleware/role.middleware.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -43,6 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 //////////////////////////////////////////////////////
 app.use(
   helmet({
+    contentSecurityPolicy: false,
     crossOriginResourcePolicy: false,
   })
 );
@@ -50,7 +56,12 @@ app.use(
 //////////////////////////////////////////////////////
 // 📂 STATIC FILES
 //////////////////////////////////////////////////////
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+// Serve frontend in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+}
 
 //////////////////////////////////////////////////////
 // 📊 LOGGING
@@ -86,7 +97,7 @@ const aiLimiter = rateLimit({
 //////////////////////////////////////////////////////
 // 📌 HEALTH CHECK
 //////////////////////////////////////////////////////
-app.get("/", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({
     success: true,
     message: "Nivas API running 🚀",
@@ -124,9 +135,12 @@ app.get(
   }
 );
 
-app.get("/test", (req, res) => {
-  res.json({ success: true, message: "Test route working ✅" });
-});
+// Catch-all for React Router in production
+if (process.env.NODE_ENV === "production") {
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../../frontend/dist", "index.html"));
+  });
+}
 
 //////////////////////////////////////////////////////
 // ❌ 404 HANDLER
@@ -139,7 +153,7 @@ app.use((req, res) => {
 });
 
 //////////////////////////////////////////////////////
-// ❌ GLOBAL ERROR HANDLER (FIXED 🔥)
+// ❌ GLOBAL ERROR HANDLER
 //////////////////////////////////////////////////////
 app.use((err, req, res, next) => {
   logger.error(err.message);

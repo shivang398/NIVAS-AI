@@ -26,9 +26,11 @@ const TenantRentTab = () => {
     }
   };
 
-  const handlePayRent = (propertyName) => {
-    alert(`Initiating secure rent payment for ${propertyName}...`);
-    // Placeholder for payment gateway logic
+  const handlePayRent = (leaseId, propertyName) => {
+    if (window.confirm(`Since online payments are not yet integrated, do you want to mark the rent for ${propertyName} as paid (e.g. cash, bank transfer) and notify the owner?`)) {
+      alert(`Success! Payment notification sent to the owner of ${propertyName}.`);
+      setLeases(leases.map(l => l.id === leaseId ? { ...l, isDemoPaid: true } : l));
+    }
   };
 
   if (loading) return <div className="text-secondary p-4 animate-pulse">Loading Rent Portal...</div>;
@@ -85,8 +87,8 @@ const TenantRentTab = () => {
               </thead>
               <tbody>
                 {leases.map((lease, index) => {
-                  // Simulate 1 out of every 3 being pending for the demo to look dynamic
-                  const isPending = index % 3 === 1; 
+                  // Simulate 1 out of every 3 being pending for the demo to look dynamic, and allow override
+                  const isPending = !lease.isDemoPaid && (index % 3 === 1); 
                   return (
                     <tr key={lease.id}>
                       <td className="font-medium">{lease.property?.title || "Residential Unit"}</td>
@@ -95,21 +97,21 @@ const TenantRentTab = () => {
                       <td>
                         {isPending ? (
                           <span className="status-badge" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', fontSize: '0.7rem' }}>
-                            <AlertCircle size={10} style={{ marginRight: '4px' }}/> DUE SOON
+                            <AlertCircle size={10} style={{ marginRight: '4px' }}/> PENDING
                           </span>
                         ) : (
                           <span className="status-badge" style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', fontSize: '0.7rem' }}>
-                            <CheckCircle2 size={10} style={{ marginRight: '4px' }}/> SECURED
+                            <CheckCircle2 size={10} style={{ marginRight: '4px' }}/> {lease.isDemoPaid ? 'PAID' : 'SECURED'}
                           </span>
                         )}
                       </td>
                       <td>
                         {isPending ? (
-                          <button className="btn-primary small" onClick={() => handlePayRent(lease.property?.title)} style={{ fontSize: '0.75rem', padding: '0.3rem 0.8rem', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: 'white' }}>
-                            Pay Now
+                          <button className="btn-primary small" onClick={() => handlePayRent(lease.id, lease.property?.title)} style={{ fontSize: '0.75rem', padding: '0.3rem 0.8rem', background: 'linear-gradient(90deg, #22c55e, #16a34a)', color: 'white' }}>
+                            Mark as Paid
                           </button>
                         ) : (
-                          <span className="text-secondary text-xs">Payment Complete</span>
+                          <span className="text-secondary text-xs">Settled</span>
                         )}
                       </td>
                     </tr>

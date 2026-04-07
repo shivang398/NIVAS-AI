@@ -30,6 +30,13 @@ const PropertyAnalyticsTab = () => {
     alert(`Rent reminder sent to ${tenantName} successfully.`);
   };
 
+  const handleMarkPaid = (leaseId, tenantName) => {
+    if (window.confirm(`Confirm that you have received the rent payment from ${tenantName}?`)) {
+      alert(`Rent from ${tenantName} marked as PAID successfully.`);
+      setLeases(leases.map(l => l.id === leaseId ? { ...l, isDemoPaid: true } : l));
+    }
+  };
+
   if (loading) return <div className="text-secondary p-4 animate-pulse">Loading Rent Data...</div>;
 
   const totalMonthlyRent = leases.reduce((sum, lease) => sum + (lease.rent || 0), 0);
@@ -84,8 +91,8 @@ const PropertyAnalyticsTab = () => {
               </thead>
               <tbody>
                 {leases.map((lease, index) => {
-                  // Simulate 1 out of every 3 being pending for the demo to look dynamic
-                  const isPending = index % 3 === 1; 
+                  // Simulate 1 out of every 3 being pending for the demo to look dynamic, allow override
+                  const isPending = !lease.isDemoPaid && (index % 3 === 1); 
                   return (
                     <tr key={lease.id}>
                       <td className="font-medium">{lease.property?.title || "Residential Unit"}</td>
@@ -104,9 +111,14 @@ const PropertyAnalyticsTab = () => {
                       </td>
                       <td>
                         {isPending ? (
-                          <button className="btn-secondary small" onClick={() => handleRemind(lease.tenant?.name)} style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>
-                            Send Reminder
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button className="btn-primary small" onClick={() => handleMarkPaid(lease.id, lease.tenant?.name)} style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', background: 'linear-gradient(90deg, #22c55e, #16a34a)', color: 'white', border: 'none' }}>
+                              Mark as Paid
+                            </button>
+                            <button className="btn-secondary small" onClick={() => handleRemind(lease.tenant?.name)} style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}>
+                              Remind
+                            </button>
+                          </div>
                         ) : (
                           <span className="text-secondary text-xs">Settled</span>
                         )}

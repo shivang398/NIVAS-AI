@@ -146,7 +146,7 @@ export const reviewVerificationService = async (id, body, user) => {
 };
 
 
-export const getVerificationService = async (user) => {
+export const getVerificationService = async (user, queryStatus) => {
   if (!user?.id) {
     throw new AppError("User not authenticated", 401);
   }
@@ -163,8 +163,9 @@ export const getVerificationService = async (user) => {
   }
 
   if (user.role === "POLICE") {
+    const statusToFetch = queryStatus || "UNDER_REVIEW";
     const queue = await prisma.verification.findMany({
-      where: { status: "UNDER_REVIEW" },
+      where: { status: statusToFetch },
       include: {
         documents: true,
         fraudCheck: true,
@@ -175,25 +176,29 @@ export const getVerificationService = async (user) => {
       orderBy: { createdAt: "desc" },
     });
 
-    // Automatically trigger fraud checks for anything missing one
-    for (const v of queue) {
-      if (!v.fraudCheck && v.documents?.length > 0) {
-        await runFraudCheck(v.id, v.documents[0].fileUrl);
+    if (statusToFetch === "UNDER_REVIEW") {
+      // Automatically trigger fraud checks for anything missing one
+      for (const v of queue) {
+        if (!v.fraudCheck && v.documents?.length > 0) {
+          await runFraudCheck(v.id, v.documents[0].fileUrl);
+        }
       }
+
+      // Return the updated queue
+      return prisma.verification.findMany({
+        where: { status: "UNDER_REVIEW" },
+        include: {
+          documents: true,
+          fraudCheck: true,
+          offer: {
+            include: { property: true }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+      });
     }
 
-    // Return the updated queue
-    return prisma.verification.findMany({
-      where: { status: "UNDER_REVIEW" },
-      include: {
-        documents: true,
-        fraudCheck: true,
-        offer: {
-          include: { property: true }
-        }
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    return queue;
   }
 
   return [];
