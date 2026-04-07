@@ -25,6 +25,7 @@ services:
   - type: keyvalue
     name: nivas-redis
     plan: free
+    ipAllowList: []
 
 databases:
   - name: nivas-db
