@@ -14,7 +14,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: nivas-redis
           property: connectionString
       - key: JWT_SECRET
@@ -22,11 +22,10 @@ services:
       - key: VITE_API_BASE_URL
         value: /api
 
+  - type: keyvalue
+    name: nivas-redis
+    plan: free
+
 databases:
   - name: nivas-db
     plan: free
-
-redis:
-  - name: nivas-redis
-    plan: free
-    status: enabled
