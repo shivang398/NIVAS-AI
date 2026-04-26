@@ -157,6 +157,9 @@ export const getVerificationService = async (user, queryStatus) => {
       include: {
         documents: true,
         fraudCheck: true,
+        offer: {
+          include: { property: true }
+        }
       },
       orderBy: { createdAt: "desc" },
     });

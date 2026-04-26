@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nivas-frontend
+  labels:
+    app: nivas-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nivas-frontend
+  template:
+    metadata:
+      labels:
+        app: nivas-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: shivang398/nivas-frontend:latest
+          ports:
+            - containerPort: 80

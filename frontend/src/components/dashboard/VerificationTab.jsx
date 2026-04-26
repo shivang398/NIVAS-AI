@@ -16,14 +16,12 @@ const VerificationTab = ({ isOwner, user }) => {
 
   const fetchData = async () => {
     try {
-      const [vRes, oRes, nRes] = await Promise.all([
+      const [vRes, oRes] = await Promise.all([
         axios.get('/verification'),
-        axios.get('/offers'),
-        axios.get('/noc').catch(() => ({ data: { data: [] } })) // Fallback if NOC not ready
+        axios.get('/offers')
       ]);
       if (vRes.data.success) setVerifications(vRes.data.data);
       if (oRes.data.success) setAcceptedOffers(oRes.data.data.filter(o => o.status === 'ACCEPTED'));
-      if (nRes?.data?.success) setNocs(nRes.data.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -242,7 +240,7 @@ const VerificationTab = ({ isOwner, user }) => {
                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>UID: {v.id.substring(0,12).toUpperCase()}</div>
                  </div>
                  <button className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.5rem 1rem', width: '100%', borderRadius: '10px' }} onClick={() => setSelectedNoc(v)}>
-                    <Download size={14} /> View Certificate
+                    <Download size={14} /> Download Certificate
                  </button>
                </div>
              ))}

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nivas-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: nivas-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nivas-backend
+  labels:
+    app: nivas-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nivas-backend
+  template:
+    metadata:
+      labels:
+        app: nivas-backend
+    spec:
+      containers:
+        - name: backend
+          image: shivang398/nivas-backend:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: nivas-secrets
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nivas-secrets
+                  key: JWT_SECRET
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nivas-secrets
+                  key: GROQ_API_KEY

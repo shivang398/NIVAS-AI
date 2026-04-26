@@ -200,7 +200,7 @@ const Dashboard = () => {
           </nav>
         </aside>
 
-        <div className="dashboard-content" style={{ overflow: 'hidden' }}>
+        <div className="dashboard-content">
           {(activeTab === 'police_queue' || (isPolice && activeTab === 'overview')) && <PoliceDashboardTab user={user} />}
 
           {!isPolice && activeTab === 'overview' && (
@@ -346,7 +346,14 @@ const Dashboard = () => {
                         <td><span className={`status-badge ${app.status.toLowerCase()}`}>{app.status}</span></td>
                         <td>
                           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <button className="btn-secondary small" onClick={() => setActiveTab('chat')}>Negotiate</button>
+                            <button 
+                              className="btn-secondary small" 
+                              onClick={() => app.status === 'PENDING' && setActiveTab('chat')}
+                              disabled={app.status !== 'PENDING'}
+                              style={{ opacity: app.status !== 'PENDING' ? 0.5 : 1, cursor: app.status !== 'PENDING' ? 'not-allowed' : 'pointer' }}
+                            >
+                              {app.status === 'PENDING' ? 'Negotiate' : 'Closed'}
+                            </button>
                             {isOwner && app.status === 'PENDING' && (
                               <>
                                 <button 
@@ -382,7 +389,7 @@ const Dashboard = () => {
           
           {activeTab === 'chat' && <ChatTab user={user} />}
           {activeTab === 'maintenance' && <MaintenanceTab isOwner={isOwner} user={user} />}
-          {!isOwner && activeTab === 'verification' && <VerificationTab isOwner={isOwner} />}
+          {!isOwner && activeTab === 'verification' && <VerificationTab isOwner={isOwner} user={user} />}
           {activeTab === 'leases' && <LeasesTab isOwner={isOwner} />}
 
           {activeTab === 'settings' && (

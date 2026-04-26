@@ -35,7 +35,7 @@ const NocDocument = ({ verification }) => {
         <p><b>TO WHOMSOEVER IT MAY CONCERN</b></p>
         <p>
           This is to certify that the applicant with Nivas Applicant ID <b>{verification.tenantId?.substring(0, 8)}...</b>, 
-          who has accepted the rental offer reference <b>{verification.offerId}</b>, has been thoroughly vetted through 
+          who has accepted the rental offer reference <b>{verification.offerId}</b> {verification.offer?.property?.title ? <span>for property <b>{verification.offer.property.title}</b></span> : ''}, has been thoroughly vetted through 
           the <b>Nivas Automated Trust Center</b> and verified by the authorized <b>Police Portal</b>.
         </p>
         <p>
@@ -78,30 +78,36 @@ const NocDocument = ({ verification }) => {
       </div>
       
       <div className="no-print" style={{ marginTop: '30px', textAlign: 'center' }}>
-         <button className="btn-primary" onClick={() => window.print()}>
-            Print / Download PDF
+         <button className="btn-primary" onClick={() => window.print()} style={{ fontSize: '1rem', padding: '0.75rem 2rem' }}>
+            🖨️ Print / Save as PDF
          </button>
       </div>
 
       {/* Inject print styles directly */}
       <style>{`
         @media print {
-          body * {
-            visibility: hidden;
+          /* Hide the main app UI and modal overlays */
+          #root > .app-container, .no-print, button {
+            display: none !important;
           }
-          .noc-print, .noc-print * {
-            visibility: visible;
+          
+          /* Reset background for printing */
+          body {
+            background: white !important;
           }
+          
+          /* Ensure the document is visible and positioned normally */
           .noc-print {
-            position: absolute;
+            position: relative !important;
             left: 0;
             top: 0;
             width: 100%;
+            height: 100%;
             border: none !important;
             box-shadow: none !important;
-          }
-          .no-print {
-            display: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: black !important;
           }
         }
       `}</style>
