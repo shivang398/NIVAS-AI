@@ -1,4 +1,7 @@
 import { vi, beforeEach } from 'vitest';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Use vi.hoisted to ensure the mock instance is created before imports and vi.mock
 const { prismaMock } = await vi.hoisted(async () => {
